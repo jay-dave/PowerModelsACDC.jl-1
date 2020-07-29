@@ -7,7 +7,7 @@ end
 sum(p_dcgrid[a] for a in bus_arcs_dcgrid) + sum(pconv_dc[c] for c in bus_convs_dc) == pd
 ```
 """
-function constraint_kcl_shunt_dcgrid(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
+function constraint_power_balance_dc(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_convs_dc, pd)
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
 
@@ -270,7 +270,7 @@ end
 function constraint_branch_limit_on_off(pm::_PM.AbstractBFModel, n::Int, i, f_idx, t_idx, pmax, pmin, imax, imin)
     p_fr = _PM.var(pm, n, :p_dcgrid_ne)[f_idx]
     p_to = _PM.var(pm, n, :p_dcgrid_ne)[t_idx]
-    z = _PM.var(pm, n, :branch_ne)[i]
+    z = _PM.var(pm, n, :branchdc_ne)[i]
     ccm_dcgrid = _PM.var(pm, n, :ccm_dcgrid_ne, i)
     JuMP.@constraint(pm.model,  p_fr <= pmax * z)
     JuMP.@constraint(pm.model,  p_fr >= pmin * z)
@@ -283,7 +283,7 @@ function constraint_branch_limit_on_off(pm::_PM.AbstractBFModel, n::Int, i, f_id
 function constraint_branch_limit_on_off(pm::_PM.AbstractWRModels, n::Int, i, f_idx, t_idx, pmax, pmin, imax, imin)
     p_fr = _PM.var(pm, n, :p_dcgrid_ne)[f_idx]
     p_to = _PM.var(pm, n, :p_dcgrid_ne)[t_idx]
-    z = _PM.var(pm, n, :branch_ne)[i]
+    z = _PM.var(pm, n, :branchdc_ne)[i]
     JuMP.@constraint(pm.model,  p_fr <= pmax * z)
     JuMP.@constraint(pm.model,  p_fr >= pmin * z)
     JuMP.@constraint(pm.model,  p_to <= pmax * z)
@@ -293,7 +293,7 @@ end
 function constraint_branch_limit_on_off(pm::_PM.AbstractPowerModel, n::Int, i, f_idx, t_idx, pmax, pmin, imax, imin)
     p_fr = _PM.var(pm, n, :p_dcgrid_ne)[f_idx]
     p_to = _PM.var(pm, n, :p_dcgrid_ne)[t_idx]
-    z = _PM.var(pm, n, :branch_ne)[i]
+    z = _PM.var(pm, n, :branchdc_ne)[i]
 
     JuMP.@constraint(pm.model,  p_fr <= pmax * z)
     JuMP.@constraint(pm.model,  p_fr >= pmin * z)
@@ -304,7 +304,7 @@ end
 function constraint_branch_limit_on_off(pm::_PM.AbstractACPModel, n::Int, i, f_idx, t_idx, pmax, pmin, imax, imin)
     p_fr = _PM.var(pm, n, :p_dcgrid_ne)[f_idx]
     p_to = _PM.var(pm, n, :p_dcgrid_ne)[t_idx]
-    z = _PM.var(pm, n, :branch_ne)[i]
+    z = _PM.var(pm, n, :branchdc_ne)[i]
 
     JuMP.@constraint(pm.model,  p_fr <= pmax * z)
     JuMP.@constraint(pm.model,  p_fr >= pmin * z)
@@ -320,14 +320,21 @@ function constraint_candidate_converters_mp(pm::_PM.AbstractPowerModel, n::Int, 
     JuMP.@constraint(pm.model,  z == z_1)
 end
 
-function constraint_candidate_branches_mp(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+function constraint_candidate_dcbranches_mp(pm::_PM.AbstractPowerModel, n::Int, i::Int)
+    z = _PM.var(pm, n, :branchdc_ne, i)
+    z_1 = _PM.var(pm, n-1, :branchdc_ne, i)
+
+    JuMP.@constraint(pm.model,  z == z_1)
+end
+
+function constraint_candidate_acbranches_mp(pm::_PM.AbstractPowerModel, n::Int, i::Int)
     z = _PM.var(pm, n, :branch_ne, i)
     z_1 = _PM.var(pm, n-1, :branch_ne, i)
 
     JuMP.@constraint(pm.model,  z == z_1)
 end
 
-function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
+function constraint_power_balance_dc_dcne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid, bus_arcs_dcgrid_ne, bus_convs_dc, bus_convs_dc_ne, pd)
     p_dcgrid = _PM.var(pm, n, :p_dcgrid)
     p_dcgrid_ne = _PM.var(pm, n, :p_dcgrid_ne)
     pconv_dc = _PM.var(pm, n, :pconv_dc)
@@ -337,10 +344,10 @@ function constraint_kcl_shunt_dcgrid_ne(pm::_PM.AbstractPowerModel, n::Int, i::I
 end
 
 
-function constraint_kcl_shunt_dcgrid_ne_bus(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid_ne, bus_ne_convs_dc_ne, pd_ne)
+function constraint_power_balance_dcne_dcne(pm::_PM.AbstractPowerModel, n::Int, i::Int, bus_arcs_dcgrid_ne, bus_ne_convs_dc_ne, pd_ne)
     p_dcgrid_ne = _PM.var(pm, n, :p_dcgrid_ne)
     pconv_dc_ne = _PM.var(pm, n, :pconv_dc_ne)
-    xb = _PM.var(pm, n, :branch_ne)
+    xb = _PM.var(pm, n, :branchdc_ne)
     xc = _PM.var(pm, n, :conv_ne)
     JuMP.@constraint(pm.model, sum(p_dcgrid_ne[a] for a in bus_arcs_dcgrid_ne) + sum(pconv_dc_ne[c] for c in bus_ne_convs_dc_ne)  == (-pd_ne))
 end

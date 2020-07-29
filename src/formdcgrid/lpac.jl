@@ -5,7 +5,7 @@ Shunt constraint using linearized voltage magnitude difference phi
 sum(p) + sum(pconv_grid_ac)  == sum(pg) - sum(pd) - sum(gs*(1.0 + 2*phi)
 ```
 """
-function constraint_kcl_shunt(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_ac(pm::_PM.AbstractLPACModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)
@@ -54,7 +54,7 @@ end
 
 ############# TNEP Constraints #################
 
-function constraint_kcl_shunt_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_ac_dcne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
     phi = _PM.var(pm, n, :phi, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)
@@ -69,6 +69,23 @@ function constraint_kcl_shunt_ne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_
     JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*(1.0 + 2*phi))
 end
 
+function constraint_power_balance_acne_dcne(pm::_PM.AbstractLPACModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+    phi = _PM.var(pm, n, :phi, i)
+    p = _PM.var(pm, n, :p)
+    p_ne = _PM.var(pm, n, :p_ne)
+    q = _PM.var(pm, n, :q)
+    q_ne = _PM.var(pm, n, :q_ne)
+    pg = _PM.var(pm, n, :pg)
+    qg = _PM.var(pm, n, :qg)
+    pconv_grid_ac = _PM.var(pm, n, :pconv_tf_fr)
+    qconv_grid_ac = _PM.var(pm, n, :qconv_tf_fr)
+    pconv_grid_ac_ne = _PM.var(pm, n, :pconv_tf_fr_ne)
+    qconv_grid_ac_ne = _PM.var(pm, n, :qconv_tf_fr_ne)
+
+    JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_ne[a] for a in bus_arcs_ne) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*(1.0 + 2*phi))
+    JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_ne[a] for a in bus_arcs_ne) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*(1.0 + 2*phi))
+end
+
 function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, t_bus, f_idx, t_idx, r, p)
     l = f_idx[1];
     p_dc_fr = _PM.var(pm, n, :p_dcgrid_ne, f_idx)
@@ -77,7 +94,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractLPACModel, n::Int, f_bus, 
     phi_to = []
     phi_fr_du = _PM.var(pm, n, :phi_vdcm_fr, l)
     phi_to_du = _PM.var(pm, n, :phi_vdcm_to, l)
-    z = _PM.var(pm, n, :branch_ne, l)
+    z = _PM.var(pm, n, :branchdc_ne, l)
     phi_to, phi_fr = contraint_ohms_dc_branch_busvoltage_structure_phi(pm, n, f_bus, t_bus, phi_to, phi_fr)
     if r == 0
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
