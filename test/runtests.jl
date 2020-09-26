@@ -16,7 +16,7 @@ using Juniper
 
 using Test
 
-local_test = false
+local_test = false   # as some tests require Mosek, only limited set sent to travis.
 
 ipopt_solver = JuMP.with_optimizer(Ipopt.Optimizer, tol=1e-6, print_level=0)
 scs_solver = JuMP.with_optimizer(SCS.Optimizer)
@@ -29,10 +29,14 @@ if local_test == true
     import Gurobi
     import Mosek
     import MosekTools
+    import CPLEX
     gurobi = JuMP.with_optimizer(Gurobi.Optimizer)
+    cplex = JuMP.with_optimizer(CPLEX.Optimizer)
     mosek = JuMP.with_optimizer(Mosek.Optimizer)
     ##############################
 end
+include("common.jl")
+data_dc = build_mn_data("../test/data/tnep/case4_original.m")
 
 @testset "PowerModelsACDC" begin
 

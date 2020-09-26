@@ -190,7 +190,7 @@ function variable_dcgrid_voltage_magnitude_sqr_ne(pm::_PM.AbstractPowerModel; nw
             end
         end
         report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdc_ne, _PM.ids(pm, nw, :busdc_ne), wdc_ne)
-        report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdcr_ne, _PM.ids(pm, nw, :busdc_ne), wdcr_ne)
+        report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdcr_ne, _PM.ids(pm, nw, :branchdc_ne), wdcr_ne)
 end
 
 function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true) # this has to to every branch, different than its counterpart(Wdc_fr) since two candidate branches can be connected to same node and two duplicate variables will be needed
@@ -219,9 +219,9 @@ function variable_dcgrid_voltage_magnitude_sqr_du(pm::_PM.AbstractPowerModel; nw
             JuMP.set_upper_bound(wdcr_frto_ne[i],  1.21)
         end
     end
-    report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdc_du_fr, _PM.ids(pm, nw, :busdc_ne), wdc_fr_ne)
-    report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdc_du_to, _PM.ids(pm, nw, :busdc_ne), wdc_to_ne)
-    report && _IM.sol_component_value(pm, nw, :busdc_ne, :wdcr_du, _PM.ids(pm, nw, :busdc_ne), wdcr_frto_ne)
+    report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdc_du_fr, _PM.ids(pm, nw, :branchdc_ne), wdc_fr_ne)
+    report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdc_du_to, _PM.ids(pm, nw, :branchdc_ne), wdc_to_ne)
+    report && _IM.sol_component_value(pm, nw, :branchdc_ne, :wdcr_du, _PM.ids(pm, nw, :branchdc_ne), wdcr_frto_ne)
 end
 
 "variable: `p_dcgrid[l,i,j]` for `(l,i,j)` in `arcs_dcgrid`"
@@ -263,13 +263,13 @@ end
 "variable: `0 <= convdc_ne[c] <= 1` for `c` in `candidate converters"
 function variable_branch_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, relax::Bool=false, report::Bool=true)
     if !relax
-        Z_dc_branch_ne = _PM.var(pm, nw)[:branch_ne] = JuMP.@variable(pm.model, #branch_ne is also name in PowerModels, branchdc_ne is candidate branches
+        Z_dc_branch_ne = _PM.var(pm, nw)[:branchdc_ne] = JuMP.@variable(pm.model, #branch_ne is also name in PowerModels, branchdc_ne is candidate branches
         [l in _PM.ids(pm, nw, :branchdc_ne)], base_name="$(nw)_branch_ne",
         binary = true,
         start = _PM.comp_start_value(_PM.ref(pm, nw, :branchdc_ne, l), "convdc_tnep_start",  0.0)
         )
     else
-        Z_dc_branch_ne = _PM.var(pm, nw)[:branch_ne] = JuMP.@variable(pm.model, #branch_ne is also name in PowerModels, branchdc_ne is candidate branches
+        Z_dc_branch_ne = _PM.var(pm, nw)[:branchdc_ne] = JuMP.@variable(pm.model, #branch_ne is also name in PowerModels, branchdc_ne is candidate branches
         [l in _PM.ids(pm, nw, :branchdc_ne)], base_name="$(nw)_branch_ne",
         lower_bound = 0,
         upper_bound = 1,

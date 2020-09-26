@@ -4,7 +4,7 @@ sum(p[a] for a in bus_arcs) + sum(p_dc[a_dc] for a_dc in bus_arcs_dc) == sum(pg[
 sum(q[a] for a in bus_arcs) + sum(q_dc[a_dc] for a_dc in bus_arcs_dc) == sum(qg[g] for g in bus_gens) + sum(qconvac[c] for c in bus_convs) - qd + bs*v^2
 ```
 """
-function constraint_kcl_shunt(pm::_PM.AbstractACPModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_ac(pm::_PM.AbstractACPModel, n::Int,  i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_loads, bus_shunts, pd, qd, gs, bs)
     vm = _PM.var(pm, n,  :vm, i)
     p = _PM.var(pm, n,  :p)
     q = _PM.var(pm, n,  :q)
@@ -54,7 +54,7 @@ sum(p[a] for a in bus_arcs) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(
 sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(qg[g] for g in bus_gens)  - qd + bs*v^2
 ```
 """
-function constraint_kcl_shunt_ne(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+function constraint_power_balance_ac_dcne(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_arcs, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
     vm = _PM.var(pm, n, :vm, i)
     p = _PM.var(pm, n, :p)
     q = _PM.var(pm, n, :q)
@@ -68,6 +68,27 @@ function constraint_kcl_shunt_ne(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_a
     JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
 end
 """
+```
+sum(p[a] for a in bus_arcs) + sum(p_ne[a] for a in bus_arcs_ne) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(pg[g] for g in bus_gens)  - pd - gs*v^2
+sum(q[a] for a in bus_arcs) + sum(q_ne[a] for a in bus_arcs_ne) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne) == sum(qg[g] for g in bus_gens)  - qd + bs*v^2
+```
+"""
+function constraint_power_balance_acne_dcne(pm::_PM.AbstractACPModel, n::Int, i::Int, bus_arcs, bus_arcs_ne, bus_arcs_dc, bus_gens, bus_convs_ac, bus_convs_ac_ne, bus_loads, bus_shunts, pd, qd, gs, bs)
+    vm = _PM.var(pm, n, :vm, i)
+    p = _PM.var(pm, n, :p)
+    p_ne = _PM.var(pm,n, :p_ne)
+    q = _PM.var(pm, n, :q)
+    q_ne = _PM.var(pm,n, :q_ne)
+    pg = _PM.var(pm, n, :pg)
+    qg = _PM.var(pm, n, :qg)
+    pconv_grid_ac = _PM.var(pm, n, :pconv_tf_fr)
+    qconv_grid_ac = _PM.var(pm, n, :qconv_tf_fr)
+    pconv_grid_ac_ne = _PM.var(pm, n, :pconv_tf_fr_ne)
+    qconv_grid_ac_ne = _PM.var(pm, n, :qconv_tf_fr_ne)
+    JuMP.@constraint(pm.model, sum(p[a] for a in bus_arcs) + sum(p_ne[a] for a in bus_arcs_ne) + sum(pconv_grid_ac[c] for c in bus_convs_ac) + sum(pconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(pg[g] for g in bus_gens)  - sum(pd[d] for d in bus_loads) - sum(gs[s] for s in bus_shunts)*vm^2)
+    JuMP.@constraint(pm.model, sum(q[a] for a in bus_arcs) + sum(q_ne[a] for a in bus_arcs_ne) + sum(qconv_grid_ac[c] for c in bus_convs_ac) + sum(qconv_grid_ac_ne[c] for c in bus_convs_ac_ne)  == sum(qg[g] for g in bus_gens)  - sum(qd[d] for d in bus_loads) + sum(bs[s] for s in bus_shunts)*vm^2)
+end
+"""
 Creates Ohms constraints for DC branches
 
 ```
@@ -79,7 +100,7 @@ function constraint_ohms_dc_branch_ne(pm::_PM.AbstractACPModel, n::Int,  f_bus, 
     p_dc_to = _PM.var(pm, n, :p_dcgrid_ne, t_idx)
     vmdc_fr = []
     vmdc_to = []
-    z = _PM.var(pm, n, :branch_ne, f_idx[1])
+    z = _PM.var(pm, n, :branchdc_ne, f_idx[1])
     vmdc_to, vmdc_fr = contraint_ohms_dc_branch_busvoltage_structure(pm, n, f_bus, t_bus, vmdc_to, vmdc_fr)
     if r == 0
         JuMP.@constraint(pm.model, p_dc_fr + p_dc_to == 0)
