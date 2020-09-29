@@ -299,6 +299,9 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "pr
             resultLPAC = run_mp_acdctnepopf(data_acdc, LPACCPowerModel, juniper, multinetwork=true; setting = s)
             @test isapprox(resultLPAC["objective"], 614.15; atol = 1e-1)
             @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["3"]["isbuilt"], 1; atol = 1e-2)
+            @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
+            @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["1"]["isbuilt"], 1; atol = 1e-2)
+
             @test isapprox(resultLPAC["solution"]["nw"]["1"]["branchdc_ne"]["3"]["pf"], -1.2466; atol = 1e-2)
             @test isapprox(resultLPAC["solution"]["nw"]["2"]["branchdc_ne"]["3"]["pf"], -1.2466; atol = 1e-2)
             @test isapprox(resultLPAC["solution"]["nw"]["2"]["convdc_ne"]["2"]["isbuilt"], 1; atol = 1e-2)
