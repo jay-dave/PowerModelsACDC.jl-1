@@ -6,7 +6,7 @@ s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true)
         @test result["termination_status"] == LOCALLY_SOLVED
         @test isapprox(result["objective"], 5907; atol = 1e0)
     end
-    @testset "5-bus ac dc case" begin
+    @testset "5-bus ac   dc case" begin
         result = run_acdcopf("../test/data/case5_acdc.m", ACPPowerModel, ipopt_solver; setting = s)
 
         @test result["termination_status"] == LOCALLY_SOLVED
