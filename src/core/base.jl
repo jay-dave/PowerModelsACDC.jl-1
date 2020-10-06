@@ -17,7 +17,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
             end
             nw_ref[:bus_arcs_dcgrid] = bus_arcs_dcgrid
 
-            # bus_convs for AC side power injection of DC converters
+                # bus_convs for AC side power injection of DC converters
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
             for (i,conv) in nw_ref[:convdc]
                 push!(bus_convs_ac[conv["busac_i"]], i)
@@ -98,6 +98,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
             nw_ref[:arcs_dcgrid_to] = Dict{String, Any}()
             nw_ref[:arcs_conv_acdc] = Dict{String, Any}()
             nw_ref[:bus_arcs_dcgrid] = Dict{String, Any}()
+            nw_ref[:arcs_reserves_syn] = Dict{String, Any}()
             bus_convs_ac = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
             for (i,conv) in nw_ref[:convdc]
                 push!(bus_convs_ac[conv["busac_i"]], i)
@@ -266,6 +267,71 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
             nw_ref[:ref_buses_dc_ne] = Dict{String, Any}()
             nw_ref[:buspairsdc_ne] = Dict{String, Any}()
         end
+    end
+end
+
+function add_ref_frequency!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (n, nw_ref) in ref[:nw]
+        nw_ref[:reserves] = Dict([x for x in nw_ref[:reserves]])
+
+        bus_convs_dirct =  Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+            #to determine which converters are connected to particular dc line contingency - FS strategies
+            for (b,br) in nw_ref[:branchdc]
+                if br["rateA"] == 0
+                    for (c, cv) in nw_ref[:convdc]
+                        if cv["busdc_i"] == br["fbusdc"] ||  cv["busdc_i"] == br["tbusdc"]
+                            push!(bus_convs_dirct[cv["syncarea"]], c)
+                        end
+                    end
+                end
+            end
+         nw_ref[:bus_convs_dirct] =   bus_convs_dirct
+
+         if isempty(bus_convs_dirct) == true
+             Memento.error(_LOGGER, "no contigency defined for frequency constraint. set rateA to zero for the line that has contigency")
+         end
+
+        nw_ref[:arcs_sync_conv] = [(i,conv["busac_i"],conv["syncarea"]) for (i,conv) in nw_ref[:convdc]]
+
+        bus_arcs_load = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+         for (la,load) in nw_ref[:load]
+            ac_bus = load["load_bus"]
+              for (c,conv) in nw_ref[:convdc]
+                 if conv["busac_i"] == ac_bus
+                 push!(bus_arcs_load[conv["syncarea"]], la)
+                 end
+             end
+         end
+         nw_ref[:bus_arcs_load] = bus_arcs_load
+
+         bus_arcs_conv = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+         for (l,i,j) in nw_ref[:arcs_sync_conv]
+             push!(bus_arcs_conv[j], l)
+         end
+         nw_ref[:bus_arcs_conv] = bus_arcs_conv
+
+         #which reserves belongs to which synchronous area
+         arcs_reserves_syn = Dict([(i, []) for (i,reserve) in nw_ref[:reserves]])
+         for (i,reserve) in nw_ref[:reserves]
+           push!(arcs_reserves_syn[reserve["syncarea"]], i)
+         end
+         nw_ref[:arcs_reserves_syn] = arcs_reserves_syn
+     end
+end
+
+function add_ref_frequency_candidates!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
+    for (n, nw_ref) in ref[:nw]
+    bus_convs_dirct_ne =  Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+    #to determine which converters are connected to particular dc line contingency
+    for (b,br) in nw_ref[:branchdc_ne]
+        if br["rateA"] == 0
+            for (c, cv) in nw_ref[:convdc_ne]
+                if cv["busdc_i"] == br["fbusdc"] ||  cv["busdc_i"] == br["tbusdc"]
+                    push!(bus_convs_dirct_ne[cv["syncarea"]], c)
+                end
+            end
+        end
+        nw_ref[:bus_convs_dirct_ne] =   bus_convs_dirct_ne
     end
 end
 
