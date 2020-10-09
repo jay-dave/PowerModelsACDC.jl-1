@@ -331,8 +331,10 @@ function add_ref_frequency_candidates!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
                 end
             end
         end
+    end
         nw_ref[:bus_convs_dirct_ne] =   bus_convs_dirct_ne
     end
+
 end
 
 

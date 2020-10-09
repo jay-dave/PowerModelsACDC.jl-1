@@ -23,6 +23,8 @@ __init__() = Memento.register(_LOGGER)
 
 
 include("prob/acdcopf.jl")
+include("prob/acdcfscopf.jl")
+
 include("prob/acdcpf.jl")
 include("prob/acdcopf_bf.jl")
 include("prob/tnepopf.jl")
@@ -40,8 +42,10 @@ include("core/solution.jl")
 include("core/data.jl")
 include("core/variabledcgrid.jl")
 include("core/variableconv.jl")
+include("core/variablefreq.jl")
 include("core/base.jl")
 include("core/constraint.jl")
+include("core/constraintfreq.jl")
 include("core/objective.jl")
 include("core/relaxation_scheme.jl")
 
