@@ -13,14 +13,14 @@ using JLD2
 Total_sample = 50  # sample per year
 total_yr = 6  # the years in horizon, data coming from excels
 period = "multi" # single or multi
-# Prot_system = "FS_MDCCB"
+Prot_system = "FS_MDCCB"
 Prot_system_coll = ["FS_MDCCB", "Permanentloss", "FS_HDCCB", "NS_CB", "NS_FB"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
-max_curt = 0
+max_curt = 1
 
-for proti = 1:5
-    Prot_system = Prot_system_coll[proti]
+# for proti = 1:5
+#     Prot_system = Prot_system_coll[proti]
     file = "./test/data/4bus_OPF.m"
     data_sp = _PM.parse_file(file)
     _PMACDC.process_additional_data!(data_sp)
@@ -31,7 +31,7 @@ for proti = 1:5
     no_nw = 2 * Total_sample*total_yr
     data_mp = multi_network(file, no_nw)
     year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
-
+    year = ["NAT_2025_Generation"]
     yr = 1
     nw_no = 0
     @load "scenario.jld2"

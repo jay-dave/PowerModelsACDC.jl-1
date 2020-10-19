@@ -1,4 +1,4 @@
-function constraint_frequency_stab_MP(pm::_PM.AbstractPowerModel) #gurobi
+function constraint_frequency_stab_OPF(pm::_PM.AbstractPowerModel) #gurobi
     if pm.setting["Permanentloss"] == true
         constraint_frequency_stab_OPF_MP_PL(pm)
     elseif pm.setting["FSprotection"] == true || pm.setting["NSprotection"] == true
@@ -17,17 +17,19 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
         Phvdccaux = _PM.var(pm, nw)[:Phvdccaux]
         Pconv1 = _PM.var(pm, base, :pconv_tf_fr)
         Pconv2 = _PM.var(pm, nw, :pconv_tf_fr)
-        Zb1 = _PM.var(pm, nw)[:Zb1]
+        Zb1 = _PM.var(pm, nw)[:zb1]
 
         # for i in syncarea
         i = 2
         JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == 0)
+        JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
 
+        JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
+        JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])
         Pg = _PM.var(pm, nw, :Pgg, i)/load["pd"]
         Pf = _PM.var(pm, nw, :Pff, i)/load["pd"]
-
         reserves = _PM.ref(pm, nw, :reserves)
         bi_bp = Dict([((reserves["syncarea"]),i ) for (i,reserves) in _PM.ref(pm, nw, :reserves)])
         Td = reserves[bi_bp[i]]["Td"]
@@ -43,7 +45,7 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
         z41 = _PM.var(pm, nw, :z41, i)
         z12 = _PM.var(pm, nw, :z12, i)
         z42 = _PM.var(pm, nw, :z42, i)
-        e = 1e-03
+        e = 1e-06
         p2r = (50/(2*H))
 
         ############## frequency minimum in interval 1 ##########################################
@@ -96,11 +98,11 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
         Phvdccaux = _PM.var(pm, nw)[:Phvdccaux]
         Pconv1 = _PM.var(pm, base, :pconv_tf_fr)
         Pconv2 = _PM.var(pm, nw, :pconv_tf_fr)
-        Zb1 = _PM.var(pm, nw)[:Zb1]
+        Zb1 = _PM.var(pm, nw)[:zb1]
 
         # for i in syncarea
         i = ev_syncarea
-        conv_conn = _PM.ref(pm, nw, :bus_arcs_conv_ne, i)
+        conv_conn = _PM.ref(pm, nw, :bus_arcs_conv, i)
 
         if pm.setting["FSprotection"] == true
             display("FSprotection")
@@ -115,9 +117,13 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
                 JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
          elseif pm.setting["NSprotection"] == true
             display("NSprotection")
-            JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv_ne, i)) /load["pd"])
-            JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv_ne, i)) / load["pd"])
+            JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"])
+            JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
+            JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
         end
+
+        JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
+        JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])
 
         Pg = _PM.var(pm, nw, :Pgg, i)/load["pd"]
         Pf = _PM.var(pm, nw, :Pff, i)/load["pd"]
@@ -134,7 +140,6 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
         z2 = _PM.var(pm, nw, :z2, i)
         z3 = _PM.var(pm, nw, :z3, i)
         z4 = _PM.var(pm, nw, :z4, i)
-        z5 = _PM.var(pm, nw, :z5, i)
         z11 = _PM.var(pm, nw, :z11, i)
         z21 = _PM.var(pm, nw, :z21, i)
         z31 = _PM.var(pm, nw, :z31, i)
@@ -143,10 +148,11 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
         z22 = _PM.var(pm, nw, :z22, i)
         z32 = _PM.var(pm, nw, :z32, i)
         z42 = _PM.var(pm, nw, :z42, i)
-        e = 1e-03
+        e = 1e-06
         p2r = (50/(2*H))
-
-        ############## frequency minimum in interval 1 ##########################################
+        M = 1
+        # M = ub(Pf + Pg +  Phvdccaux[i])
+       ############## frequency minimum in interval 1 ##########################################
          JuMP.@constraint(pm.model,  Phvdcoaux[i]  +e <=   Pf + (Pg/Tg)*Tf + M*(1-z11))
          JuMP.@constraint(pm.model,  Phvdcoaux[i]  >= Pf + (Pg/Tg)*Tf - M*(z11))
          JuMP.@constraint(pm.model, 0 <=   Phvdcoaux[i]  + M*(1-z12))
@@ -156,7 +162,6 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
 
          k11 = _PM.var(pm, nw, :k11, i)
          k12 = _PM.var(pm, nw, :k12, i)
-         k13 = _PM.var(pm, nw, :k13, i)
 
          JuMP.@constraint(pm.model,k11 ==  (H/50)*(Pg/Tg + Pf/Tf) )
          JuMP.@constraint(pm.model,k12 ==  (Phvdcoaux[i])/2)

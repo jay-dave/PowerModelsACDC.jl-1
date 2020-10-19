@@ -278,8 +278,8 @@ function constraint_branch_limit_on_off(pm::_PM.AbstractBFModel, n::Int, i, f_id
     JuMP.@constraint(pm.model,  p_to >= pmin * z)
     JuMP.@constraint(pm.model,  ccm_dcgrid <= imax^2 * z)
     JuMP.@constraint(pm.model,  ccm_dcgrid >= imin^2 * z)
+end
 
-    end
 function constraint_branch_limit_on_off(pm::_PM.AbstractWRModels, n::Int, i, f_idx, t_idx, pmax, pmin, imax, imin)
     p_fr = _PM.var(pm, n, :p_dcgrid_ne)[f_idx]
     p_to = _PM.var(pm, n, :p_dcgrid_ne)[t_idx]

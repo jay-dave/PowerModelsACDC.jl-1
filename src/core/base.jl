@@ -335,6 +335,41 @@ function add_ref_frequency_candidates!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
         nw_ref[:bus_convs_dirct_ne] =   bus_convs_dirct_ne
     end
 
+                nw_ref[:arcs_sync_conv_ne] = [(i,conv["busac_i"],conv["syncarea"]) for (i,conv) in nw_ref[:convdc_ne]]
+                nw_ref[:reserves] = Dict([x for x in nw_ref[:reserves]])
+                bus_arcs_load_ne = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+                for (la,load) in nw_ref[:load]
+                        ac_bus = load["load_bus"]
+                        for (c,conv) in nw_ref[:convdc_ne]
+                            if conv["busac_i"] == ac_bus
+                             push!(bus_arcs_load_ne[conv["syncarea"]], la)
+                             end
+                        end
+                end
+                nw_ref[:bus_arcs_load_ne] = bus_arcs_load_ne
+
+                bus_arcs_conv_ne = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+                for (l,i,j) in nw_ref[:arcs_sync_conv_ne]
+                    push!(bus_arcs_conv_ne[j], l)
+                end
+                nw_ref[:bus_arcs_conv_ne] = bus_arcs_conv_ne
+
+                bus_arcs_sync_ne = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
+                for (l,i,j) in nw_ref[:arcs_sync_conv_ne]
+                    push!(bus_arcs_sync_ne[j], i)
+                end
+                nw_ref[:bus_arcs_sync_ne] = bus_arcs_sync_ne
+
+                arcs_reserves_syn_ne = Dict([(i, []) for (i,reserve) in nw_ref[:reserves]])
+                for (i,reserve) in nw_ref[:reserves]
+                    push!(arcs_reserves_syn_ne[reserve["syncarea"]], i)
+                end
+                nw_ref[:arcs_reserves_syn_ne] = arcs_reserves_syn_ne
+
+                bus_syc_arc_ne = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
+                for (i,conv) in nw_ref[:convdc_ne]
+                     push!(bus_syc_arc_ne[conv["busac_i"]],conv["syncarea"])
+                end
 end
 
 

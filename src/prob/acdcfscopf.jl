@@ -9,7 +9,7 @@ end
 
 ""
 function run_acdcscopf(data::Dict{String,Any}, model_type::Type, solver; kwargs...)
-    return _PM.run_model(data, model_type, solver, post_acdcscopf; ref_extensions = [add_ref_dcgrid!], kwargs...)
+    return _PM.run_model(data, model_type, solver, post_acdcscopf; ref_extensions = [add_ref_dcgrid!, add_ref_frequency!], kwargs...)
     # return PowerModels.optimize_model!(pm, solver; solution_builder = get_solution_acdc)
 end
 
@@ -42,7 +42,7 @@ function post_acdcscopf(pm::_PM.AbstractPowerModel)
 
 
     for i in _PM.ids(pm, :bus)
-        constraint_kcl_shunt(pm, i; nw = n)
+        constraint_power_balance_ac(pm, i; nw = n)
     end
 
     for i in _PM.ids(pm, :branch)
@@ -54,7 +54,7 @@ function post_acdcscopf(pm::_PM.AbstractPowerModel)
     end
 
     for i in _PM.ids(pm, :busdc)
-        constraint_kcl_shunt_dcgrid(pm, i; nw = n)
+        constraint_power_balance_dc(pm, i; nw = n)
     end
     for i in _PM.ids(pm, nw = n, :branchdc)
         constraint_ohms_dc_branch(pm, i; nw = n)
