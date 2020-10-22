@@ -10,14 +10,14 @@ using MAT
 using XLSX
 using JLD2
 
-Total_sample = 50  # sample per year
-total_yr = 6  # the years in horizon, data coming from excels
+Total_sample = 1  # sample per year
+total_yr = 1  # the years in horizon, data coming from excels
 period = "multi" # single or multi
 Prot_system = "FS_MDCCB"
 Prot_system_coll = ["FS_MDCCB", "Permanentloss", "FS_HDCCB", "NS_CB", "NS_FB"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
-max_curt = 1
+max_curt = 0
 
 # for proti = 1:5
 #     Prot_system = Prot_system_coll[proti]
@@ -31,7 +31,7 @@ max_curt = 1
     no_nw = 2 * Total_sample*total_yr
     data_mp = multi_network(file, no_nw)
     year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
-    year = ["NAT_2025_Generation"]
+    year = ["NAT_2050_Generation"]
     yr = 1
     nw_no = 0
     @load "scenario.jld2"
@@ -86,7 +86,6 @@ max_curt = 1
                 end_nw = end_nw + 2
             end
             push!(base_list, st_nw - 1)
-            br_no = 2
             for n = st_nw:end_nw
                 push!(Cont_list, (st_nw - 1, n, br_no))
                 data_ip["nw"]["$n"]["branchdc"]["$br_no"]["rateA"] = 0
@@ -97,60 +96,61 @@ max_curt = 1
     end
 
     data_ps = mp_datainputs(deepcopy(data_mp), Total_sample)
-    data_cont, Cont_list, base_list = mp_contignecy(deepcopy(data_ps), Total_sample*total_yr, 1)
-    if Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB"
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => true, "NSprotection" => false,
-    "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea)
-    elseif Prot_system == "NS_CB" || Prot_system == "NS_FB"
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => true,
-    "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea)
-    else
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => false,
-    "Permanentloss" => true, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea)
-    end
+    data_cont, Cont_list, base_list = mp_contignecy(deepcopy(data_ps), Total_sample*total_yr, 2)
+        if Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB"
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => true, "NSprotection" => false,
+        "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea)
+        elseif Prot_system == "NS_CB" || Prot_system == "NS_FB"
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => true,
+        "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea)
+        else
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => false,
+        "Permanentloss" => true, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea)
+        end
 
-    if period == "single"   push!(s, "multiperiod"=> false)
-    elseif period == "multi"  push!(s, "multiperiod"=> true )
-    end
+        if period == "single"   push!(s, "multiperiod"=> false)
+        elseif period == "multi"  push!(s, "multiperiod"=> true )
+        end
 
     @assert ( s["FSprotection"] == true && (Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB") ) || (s["NSprotection"] == true && (Prot_system == "NS_CB" || Prot_system == "NS_FB"))|| (Prot_system == "Permanentloss" && s["NSprotection"] == false && s["FSprotection"] == false)
-
+    conv_rate = Int(data_cont["nw"]["1"]["branchdc"]["1"]["rateA"]*100)
     if occursin("4bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\",Prot_system,".xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\",conv_rate,"MW\\",Prot_system,".xlsx")
     elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\",Prot_system,".xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\injection\\",conv_rate,"MW\\",Prot_system,".xlsx")
     end
 
-for (n,nw) in data_cont["nw"]
-            for (r,reserves) in nw["reserves"]
-                 if Prot_system == "FS_HDCCB"; reserves["Tcl"] = 0.148
-                 elseif Prot_system == "FS_MDCCB"; reserves["Tcl"] = 0.293
-                 elseif Prot_system == "NS_FB"; reserves["Tcl"] = 0.100
-                  elseif Prot_system == "NS_CB"; reserves["Tcl"] = 0.150
-                 elseif Prot_system == "Permanentloss"; reserves["Tcl"] = 100
+    for (n,nw) in data_cont["nw"]
+                for (r,reserves) in nw["reserves"]
+                     if Prot_system == "FS_HDCCB"; reserves["Tcl"] = 0.148
+                     elseif Prot_system == "FS_MDCCB"; reserves["Tcl"] = 0.293
+                     elseif Prot_system == "NS_FB"; reserves["Tcl"] = 0.100
+                      elseif Prot_system == "NS_CB"; reserves["Tcl"] = 0.150
+                     elseif Prot_system == "Permanentloss"; reserves["Tcl"] = 100
+                     end
                  end
-             end
- end
+     end
 
-resultDC1 = _PMACDC.run_acdcscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
-display(curtailed_gen)
-curtail, maxFFR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
-     # XLSX.openxlsx(filepath, mode="w") do xf
-     #    sheet = xf[1]
-     #    sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-     #    sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-     #    sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-     #    sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-     #    # sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
-     #    sheet["$(string("A",5))"] = sum(curtail)
-     #    sheet["$(string("A",6))"] = resultDC1["objective"]
-     #    sheet["$(string("A",7))"] = maxFFR
-     #    sheet["$(string("A",8))"] = resultDC1["objective_lb"]
-    # end
-end
+    resultDC1 = _PMACDC.run_acdcscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
+    display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
+    display(curtailed_gen)
+    curtail, maxFFR, maxFCR = curtailment(data_mp, base_list, resultDC1, curtailed_gen)
+#      XLSX.openxlsx(filepath, mode="w") do xf
+#         sheet = xf[1]
+#         sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
+#         sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+#         sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+#         sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+#         # sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
+#         sheet["$(string("A",5))"] = sum(curtail)
+#         sheet["$(string("A",6))"] = resultDC1["objective"]
+#         sheet["$(string("A",7))"] = maxFFR
+#         sheet["$(string("A",8))"] = maxFCR
+#         sheet["$(string("A",9))"] = resultDC1["objective_lb"]
+#     end
+# end
 ######################start inertia############################
-# inertia = 1:0.5:4
+# inertia = 1:0.1:1.3
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]
 # filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\inertia\\",Prot_system,".xlsx")
 # XLSX.openxlsx(filepath, mode="w") do xf
@@ -164,7 +164,7 @@ end
 #                  elseif Prot_system == "NS_CB"; reserves["Tcl"] = 0.150
 #                  elseif Prot_system == "Permanentloss"; reserves["Tcl"] = 100
 #                  end
-#                  reserves["H"] = inertia[i]
+#                  reserves["H"] = deepcopy(reserves["H"])*inertia[i]
 #             end
 #         end
 #          display(data_cont["nw"]["1"]["gen"]["3"]["pmax"])
@@ -185,10 +185,10 @@ end
 # end
 ######################end inertia############################
 
-######################start fuel cost############################
+#####################start fuel cost############################
 # fuel_cost = 8:1:12
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\fuel_cost\\",Prot_system,".xlsx", )
+# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\fuel_cost\\",Prot_system,".xlsx", )
 # XLSX.openxlsx(filepath, mode = "w") do xf
 #         for i = 1:length(fuel_cost)
 #             for (n, nw) in data_cont["nw"]
@@ -215,7 +215,7 @@ end
 ######################start FFR cost############################
 # FFR_cost = 64:8:96
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\FFR_cost\\",Prot_system,".xlsx")
+# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\FFR_cost\\",Prot_system,".xlsx")
 # XLSX.openxlsx(filepath, mode="w") do xf
 #     for i = 1:length(FFR_cost)
 #         for (n,nw) in data_cont["nw"]
@@ -244,7 +244,7 @@ end
 ######################start FCR cost############################
 # FCR_cost = [4.24 4.77 5.3 5.83 6.36]
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\FCR_cost\\",Prot_system,".xlsx")
+# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\FCR_cost\\",Prot_system,".xlsx")
 # XLSX.openxlsx(filepath, mode="w") do xf
 #     for i = 1:length(FCR_cost)
 #         for (n,nw) in data_cont["nw"]
@@ -272,7 +272,7 @@ end
 ######################start FFR time############################
 # FFR_time = [0.1 0.5 1 1.5]
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\FFR_time\\",Prot_system,".xlsx")
+# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\FFR_time\\",Prot_system,".xlsx")
 # XLSX.openxlsx(filepath, mode="w") do xf
 #         for i = 1:length(FFR_time)
 #             for (n,nw) in data_cont["nw"]
@@ -300,7 +300,7 @@ end
 ######################start FCR time############################
 # FCR_time = [5  10]
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\FCR_time\\",Prot_system,".xlsx")
+# filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\FCR_time\\",Prot_system,".xlsx")
 # XLSX.openxlsx(filepath, mode="w") do xf
 #         for i = 1:length(FCR_time)
 #             for (n,nw) in data_cont["nw"]
@@ -328,13 +328,13 @@ end
 ######################start Curtailemnt percentage############################
 #     curtl = [0 0.1 0.2 0.3]
 #     column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-#     filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\Curtailment\\",Prot_system,".xlsx")
+#     filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\Curtailment\\",Prot_system,".xlsx")
 #     XLSX.openxlsx(filepath, mode="w") do xf
-#     for i = 1:length(curtl)
-#      s["max_curt"] = curtl[i]
-#      resultDC1 = _PMACDC.run_acdcscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
-#      curtail, maxFFR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
-#      sheet = xf[1]
+#              for i = 1:length(curtl)
+#                 s["max_curt"] = curtl[i]
+#                 resultDC1 = _PMACDC.run_acdcscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
+#                 curtail, maxFFR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
+#                 sheet = xf[1]
 #                 cell_no = string(column[i],i)
 #                 sheet["$(string(column[i],1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
 #                 sheet["$(string(column[i],2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
@@ -345,7 +345,7 @@ end
 #                 sheet["$(string(column[i],7))"] = maxFFR
 #                 sheet["$(string(column[i],8))"] = resultDC1["objective_lb"]
 #             end
-#  end
+#    end
 # end
 
 # year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
