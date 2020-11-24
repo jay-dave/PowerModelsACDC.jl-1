@@ -1,7 +1,9 @@
 function constraint_frequency_stab_OPF(pm::_PM.AbstractPowerModel) #gurobi
     if pm.setting["Permanentloss"] == true
+        display("Permanentloss")
         constraint_frequency_stab_OPF_MP_PL(pm)
     elseif pm.setting["FSprotection"] == true || pm.setting["NSprotection"] == true
+        display("FSprotection")
         constraint_frequency_stab_OPF_MP_FSNS(pm)
     end
 end
@@ -24,7 +26,7 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
         JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == 0)
-        JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
+        # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
         JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])
@@ -58,7 +60,6 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
 
          k11 = _PM.var(pm, nw, :k11, i)
          k12 = _PM.var(pm, nw, :k12, i)
-         k13 = _PM.var(pm, nw, :k13, i)
 
          JuMP.@constraint(pm.model,k11 ==  (H/50)*(Pg/Tg + Pf/Tf) )
          JuMP.@constraint(pm.model,k12 ==  (Phvdcoaux[i])/2)
@@ -105,21 +106,22 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
         conv_conn = _PM.ref(pm, nw, :bus_arcs_conv, i)
 
         if pm.setting["FSprotection"] == true
-            display("FSprotection")
+            # display("FSprotection")
             Mmax = 72/ load["pd"]
             for k in conv_conn
-                JuMP.@constraint(pm.model,  Phvdcoaux[i]  >= - (Pconv1[k]) /  load["pd"])
-                JuMP.@constraint(pm.model,  Phvdcoaux[i]  <= - (Pconv1[k]) / load["pd"] + Mmax*(1-Zb1[k]) )
-                JuMP.@constraint(pm.model,  Phvdccaux[i]  >= - Pconv2[k] /  load["pd"] -  Mmax*(1-Zb1[k]) )
-                JuMP.@constraint(pm.model,  Phvdccaux[i]  <= - Pconv2[k] / load["pd"] +   Mmax*(1-Zb1[k]) )
+                display(JuMP.@constraint(pm.model,  Phvdcoaux[i]  >= - (Pconv1[k]) /  load["pd"]) )
+                display(JuMP.@constraint(pm.model,  Phvdcoaux[i]  <= - (Pconv1[k]) / load["pd"] + Mmax*(1-Zb1[k]) ) )
+                display(JuMP.@constraint(pm.model,  Phvdccaux[i]  >= - Pconv2[k] /  load["pd"] -  Mmax*(1-Zb1[k]) ) )
+                display(JuMP.@constraint(pm.model,  Phvdccaux[i]  <= - Pconv2[k] / load["pd"] +   Mmax*(1-Zb1[k]) ) )
             end
                 JuMP.@constraint(pm.model,  sum(Zb1[k] for k in conv_conn)==1 )
-                JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
+                # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
          elseif pm.setting["NSprotection"] == true
-            display("NSprotection")
-            JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"])
-            JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
-            JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
+            # display("NSprotection")
+            # display(load["pd"])
+            display(JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"]))
+            display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"]))
+            # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4])
         end
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])

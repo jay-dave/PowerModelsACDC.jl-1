@@ -9,19 +9,18 @@ import Gurobi
 using MAT
 using XLSX
 using JLD2
-using Statistics
+using Statistics, FileIO
 include("basencont_nw.jl")
-
-Total_sample = 500  # sample per year
+Total_sample = 10  # sample per year
 total_yr = 6# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
-# Prot_system = "FS_MDCCB"
-Prot_system_coll = ["Permanentloss", "NS_CB", "FS_HDCCB"]
+# Prot_system_coll = ["FS_HDCCB"]
+Prot_system_coll = ["Permanentloss", "FS_HDCCB", "NS_CB"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
 max_curt = 1
-@load "scenario_500.jld2"
+
 for proti = 1:3
     Prot_system = Prot_system_coll[proti]
     file = "./test/data/4bus_OPF_tNEP_output.m"
@@ -29,42 +28,44 @@ for proti = 1:3
     _PMACDC.process_additional_data!(data_sp)
 
     include("bkgrnd_cal.jl")
-    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "Presolve" => -1, "MIPGap" => 0.1)
+    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "Presolve" => -1, "TimeLimit"=> 3600)
 
-    no_nw = 2 * Total_sample*total_yr
+    no_nw = 2*Total_sample*total_yr
     data_mp = multi_network(file, no_nw)
     year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
     year_num = ["2025", "2030", "2035", "2040", "2045", "2050"]
-    # year = ["NAT_2050_Generation"]
-    yr = 1
-
+    # year = ["NAT_2025_Generation"]
+    # year_num = ["2025"]
+    # yr = 1
+   # @load "scenario.jld2"
     # @load "cluster.jld2"
 
-    data_ps = mp_datainputs_nocl(deepcopy(data_mp), Total_sample, year, year_num, scenario_500, file)
-    data_cont, Cont_list, base_list = mp_contignecy_nocl(deepcopy(data_ps), Total_sample*total_yr, 2)
+    data_ps = mp_datainputs(deepcopy(data_mp), Total_sample, year, year_num,file)
+    base_weight_ip = Array{Float64}(undef, 1, no_nw)
+    @load "cluster.jld2"
+    data_cont, Cont_list, base_list, base_weight = mp_contignecy(deepcopy(data_ps), Total_sample, total_yr, 2, base_weight_ip, weights)
     year_base = year_base_networks(Total_sample, total_yr, base_list)
+        if Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB"
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => true, "NSprotection" => false,
+        "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea, "weights" => base_weight, "year_base" => year_base, "total_yr" => total_yr)
+        elseif Prot_system == "NS_CB" || Prot_system == "NS_FB"
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => true,
+        "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea, "weights" => base_weight, "year_base" => year_base, "total_yr" => total_yr)
+        else
+        s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => false,
+        "Permanentloss" => true, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea, "weights" => base_weight, "year_base" => year_base, "total_yr" => total_yr)
+        end
 
-    if Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB"
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => true, "NSprotection" => false,
-    "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea, "year_base" => year_base, "total_yr" => total_yr)
-    elseif Prot_system == "NS_CB" || Prot_system == "NS_FB"
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => true,
-    "Permanentloss" => false, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea,  "year_base" => year_base, "total_yr" => total_yr)
-    else
-    s = Dict("output" => Dict("branch_flows" => true), "conv_losses_mp" => true, "process_data_internally" => false, "FSprotection" => false, "NSprotection" => false,
-    "Permanentloss" => true, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea, "year_base" => year_base, "total_yr" => total_yr)
-    end
-
-    if period == "single"   push!(s, "multiperiod"=> false)
-    elseif period == "multi"  push!(s, "multiperiod"=> true )
-    end
+        if period == "single"   push!(s, "multiperiod"=> false)
+        elseif period == "multi"  push!(s, "multiperiod"=> true )
+        end
 
     @assert ( s["FSprotection"] == true && (Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB") ) || (s["NSprotection"] == true && (Prot_system == "NS_CB" || Prot_system == "NS_FB"))|| (Prot_system == "Permanentloss" && s["NSprotection"] == false && s["FSprotection"] == false)
     conv_rate = Int(data_cont["nw"]["1"]["convdc"]["1"]["Pacmax"]*100)
     if occursin("4bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Samples\\",conv_rate,"MW\\",Prot_system,".xlsx")
-    elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Samples\\",conv_rate,"MW\\",Prot_system,".xlsx")
+      filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Clustering\\",conv_rate,"MW\\",Prot_system,".xlsx")
+     elseif occursin("6bus", file)
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\injection\\",conv_rate,"MW\\clustering_",Total_sample,"\\",Prot_system,".xlsx")
     end
 
     for (n,nw) in data_cont["nw"]
@@ -77,8 +78,7 @@ for proti = 1:3
                      end
                  end
      end
-
-    resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
+    resultDC1 = _PMACDC.run_acdcscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
     # display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
     # display(curtailed_gen)
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
@@ -267,30 +267,26 @@ end
 ######################end FCR time############################
 
 ######################start Curtailemnt percentage############################
-#     curtl = [0.1 0.2 0.3]
-#     column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-#     filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\Curtailment-copy1\\",Prot_system,".xlsx")
-#     XLSX.openxlsx(filepath, mode="w") do xf
-#              for i = 1:length(curtl)
-#                 s["max_curt"] = curtl[i]
-#                 resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
-#                 curtail, maxFFR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
-#                 sheet = xf[1]
-#                 cell_no = string(column[i],i)
-#                 sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-#                 sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-#                 sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-#                 sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-#                 # sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
-#                 sheet["$(string("A",5))"] = sum(curtail)
-#                 sheet["$(string("A",6))"] = resultDC1["objective"]
-#                 sheet["$(string("A",7))"] = maxFFR
-#                 sheet["$(string("A",8))"] = maxFCR
-#                 sheet["$(string("A",9))"] = resultDC1["objective_lb"]
-#                 sheet["$(string("A",10))"] = meanFFR
-#                 sheet["$(string("A",11))"] = meanFCR
-#             end
-#    end
+   #  curtl = [0.1 0.2 0.3]
+   #  column = ["A" "B" "C" "D" "E" "F" "G" "H"]
+   #  filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\Curtailment-copy1\\",Prot_system,".xlsx")
+   #  XLSX.openxlsx(filepath, mode="w") do xf
+   #           for i = 1:length(curtl)
+   #              s["max_curt"] = curtl[i]
+   #              resultDC1 = _PMACDC.run_acdcscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
+   #              curtail, maxFFR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
+   #              sheet = xf[1]
+   #              cell_no = string(column[i],i)
+   #              sheet["$(string(column[i],1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
+   #              sheet["$(string(column[i],2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+   #              sheet["$(string(column[i],3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+   #              sheet["$(string(column[i],4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+   #              sheet["$(string(column[i],5))"] = sum(curtail)
+   #              sheet["$(string(column[i],6))"] = resultDC1["objective"]
+   #              sheet["$(string(column[i],7))"] = maxFFR
+   #              sheet["$(string(column[i],8))"] = resultDC1["objective_lb"]
+   #          end
+   # end
 # end
 
 # year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]

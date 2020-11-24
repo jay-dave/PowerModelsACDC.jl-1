@@ -53,6 +53,9 @@ function variable_frequency_reserves_bin(pm::_PM.AbstractPowerModel; nw::Int=pm.
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z3", binary = true, start = 0 )
     z4 = _PM.var(pm, nw)[:z4] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z4", binary = true, start = 0 )
+    z5 = _PM.var(pm, nw)[:z5] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z5", binary = true, start = 0 )
+
     ev_syncarea = pm.setting["syncarea"]
     zb1 = _PM.var(pm, nw)[:zb1] = JuMP.@variable(pm.model,
     [i in _PM.ref(pm, nw, :bus_arcs_conv, ev_syncarea)], base_name="$(nw)_zb1", binary = true, start = 0 )
@@ -61,6 +64,7 @@ function variable_frequency_reserves_bin(pm::_PM.AbstractPowerModel; nw::Int=pm.
     report && _IM.sol_component_value(pm, nw, :reserves, :z2, _PM.ids(pm, nw, :arcs_reserves_syn), z2)
     report && _IM.sol_component_value(pm, nw, :reserves, :z3, _PM.ids(pm, nw, :arcs_reserves_syn), z3)
     report && _IM.sol_component_value(pm, nw, :reserves, :z4, _PM.ids(pm, nw, :arcs_reserves_syn), z4)
+    report && _IM.sol_component_value(pm, nw, :reserves, :z5, _PM.ids(pm, nw, :arcs_reserves_syn), z5)
     report && _IM.sol_component_value(pm, nw, :convdc, :zb1, _PM.ref(pm, nw, :bus_arcs_conv, ev_syncarea), zb1)
 
     z11 = _PM.var(pm, nw)[:z11] = JuMP.@variable(pm.model,
@@ -71,6 +75,8 @@ function variable_frequency_reserves_bin(pm::_PM.AbstractPowerModel; nw::Int=pm.
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z31", binary = true, start = 0 )
     z41 = _PM.var(pm, nw)[:z41] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z41", binary = true, start = 0 )
+    z51 = _PM.var(pm, nw)[:z51] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z51", binary = true, start = 0 )
     z12 = _PM.var(pm, nw)[:z12] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z12", binary = true, start = 0 )
     z22 = _PM.var(pm, nw)[:z22] = JuMP.@variable(pm.model,
@@ -79,16 +85,21 @@ function variable_frequency_reserves_bin(pm::_PM.AbstractPowerModel; nw::Int=pm.
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z32", binary = true, start = 0 )
     z42 = _PM.var(pm, nw)[:z42] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z42", binary = true, start = 0 )
+    z52 = _PM.var(pm, nw)[:z52] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_z52", binary = true, start = 0 )
 
     report && _IM.sol_component_value(pm, nw, :reserves, :z11, _PM.ids(pm, nw, :arcs_reserves_syn), z11)
     report && _IM.sol_component_value(pm, nw, :reserves, :z21, _PM.ids(pm, nw, :arcs_reserves_syn), z21)
     report && _IM.sol_component_value(pm, nw, :reserves, :z31, _PM.ids(pm, nw, :arcs_reserves_syn), z31)
     report && _IM.sol_component_value(pm, nw, :reserves, :z41, _PM.ids(pm, nw, :arcs_reserves_syn), z41)
+    report && _IM.sol_component_value(pm, nw, :reserves, :z51, _PM.ids(pm, nw, :arcs_reserves_syn), z51)
 
     report && _IM.sol_component_value(pm, nw, :reserves, :z12, _PM.ids(pm, nw, :arcs_reserves_syn), z12)
     report && _IM.sol_component_value(pm, nw, :reserves, :z22, _PM.ids(pm, nw, :arcs_reserves_syn), z22)
     report && _IM.sol_component_value(pm, nw, :reserves, :z32, _PM.ids(pm, nw, :arcs_reserves_syn), z32)
     report && _IM.sol_component_value(pm, nw, :reserves, :z42, _PM.ids(pm, nw, :arcs_reserves_syn), z42)
+    report && _IM.sol_component_value(pm, nw, :reserves, :z52, _PM.ids(pm, nw, :arcs_reserves_syn), z52)
+
 end
 
 function variable_frequency_reserves_bin_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw, bounded::Bool = true, report::Bool=true)
