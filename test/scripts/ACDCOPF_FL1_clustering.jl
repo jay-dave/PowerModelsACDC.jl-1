@@ -63,9 +63,9 @@ for proti = 1:3
     @assert ( s["FSprotection"] == true && (Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB") ) || (s["NSprotection"] == true && (Prot_system == "NS_CB" || Prot_system == "NS_FB"))|| (Prot_system == "Permanentloss" && s["NSprotection"] == false && s["FSprotection"] == false)
     conv_rate = Int(data_cont["nw"]["1"]["convdc"]["1"]["Pacmax"]*100)
     if occursin("4bus", file)
-      filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Clustering\\",conv_rate,"MW\\",Prot_system,".xlsx")
+      filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Clustering\\",conv_rate,"MW\\",Prot_system,"_c.xlsx")
      elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\injection\\",conv_rate,"MW\\clustering_",Total_sample,"\\",Prot_system,".xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\injection\\",conv_rate,"MW\\clustering_",Total_sample,"\\",Prot_system,"_c.xlsx")
     end
 
     for (n,nw) in data_cont["nw"]

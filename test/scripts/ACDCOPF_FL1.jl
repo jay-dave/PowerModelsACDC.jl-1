@@ -17,14 +17,14 @@ total_yr = 6# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
 # Prot_system = "FS_MDCCB"
-Prot_system_coll = ["Permanentloss", "NS_CB", "FS_HDCCB"]
+Prot_system_coll = ["FS_HDCCB", "NS_CB", "Permanentloss"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
-max_curt = 1
+max_curt = 0
 @load "scenario_500.jld2"
 for proti = 1:3
     Prot_system = Prot_system_coll[proti]
-    file = "./test/data/4bus_OPF_tNEP_output.m"
+    file = "./test/data/4bus_OPF.m"
     data_sp = _PM.parse_file(file)
     _PMACDC.process_additional_data!(data_sp)
 
@@ -62,9 +62,9 @@ for proti = 1:3
     @assert ( s["FSprotection"] == true && (Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB") ) || (s["NSprotection"] == true && (Prot_system == "NS_CB" || Prot_system == "NS_FB"))|| (Prot_system == "Permanentloss" && s["NSprotection"] == false && s["FSprotection"] == false)
     conv_rate = Int(data_cont["nw"]["1"]["convdc"]["1"]["Pacmax"]*100)
     if occursin("4bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Samples\\",conv_rate,"MW\\",Prot_system,".xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
     elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\clustering_validation\\Samples\\",conv_rate,"MW\\",Prot_system,".xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
     end
 
     for (n,nw) in data_cont["nw"]
@@ -79,8 +79,8 @@ for proti = 1:3
      end
 
     resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-    # display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
-    # display(curtailed_gen)
+    display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
+    display(curtailed_gen)
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf
         sheet = xf[1]
@@ -266,29 +266,32 @@ end
 # end
 ######################end FCR time############################
 
-######################start Curtailemnt percentage############################
+#####################start Curtailemnt percentage############################
 #     curtl = [0.1 0.2 0.3]
 #     column = ["A" "B" "C" "D" "E" "F" "G" "H"]
 #     filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\Curtailment-copy1\\",Prot_system,".xlsx")
 #     XLSX.openxlsx(filepath, mode="w") do xf
 #              for i = 1:length(curtl)
+#
 #                 s["max_curt"] = curtl[i]
 #                 resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
-#                 curtail, maxFFR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
+#                 curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
 #                 sheet = xf[1]
 #                 cell_no = string(column[i],i)
-#                 sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-#                 sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-#                 sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-#                 sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+#                 display(cell_no)
+#                 sheet["$(string(column[i],1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
+#                 sheet["$(string(column[i],2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+#                 sheet["$(string(column[i],3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+#                 sheet["$(string(column[i],4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
 #                 # sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
-#                 sheet["$(string("A",5))"] = sum(curtail)
-#                 sheet["$(string("A",6))"] = resultDC1["objective"]
-#                 sheet["$(string("A",7))"] = maxFFR
-#                 sheet["$(string("A",8))"] = maxFCR
-#                 sheet["$(string("A",9))"] = resultDC1["objective_lb"]
-#                 sheet["$(string("A",10))"] = meanFFR
-#                 sheet["$(string("A",11))"] = meanFCR
+#                 sheet["$(string(column[i],5))"] = mean(resultDC1["solution"]["nw"]["1"]["Curt"])
+#                 sheet["$(string(column[i],6))"] = resultDC1["objective"]
+#                 sheet["$(string(column[i],7))"] = maxFFR
+#                 sheet["$(string(column[i],8))"] = maxFCR
+#                 sheet["$(string(column[i],9))"] = resultDC1["objective_lb"]
+#                 sheet["$(string(column[i],10))"] = meanFFR
+#                 sheet["$(string(column[i],11))"] = meanFCR
+#                 display("i: $i")
 #             end
 #    end
 # end

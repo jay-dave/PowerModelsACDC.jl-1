@@ -179,17 +179,18 @@ function objective_min_cost_OPF(pm::_PM.AbstractPowerModel)
         FFR_cost = Dict()
         FCR_cost = Dict()
         fail_prob = Dict()
-        Gen_cost = _PM.var(pm)[:Gen_cost] = JuMP.@variable(pm.model, start = 0)
-        FFRReserves = _PM.var(pm)[:FFR_Reserves] = JuMP.@variable(pm.model, start = 0)
-        FCRReserves = _PM.var(pm)[:FCR_Reserves] = JuMP.@variable(pm.model, start = 0)
-        Curt = _PM.var(pm)[:curt] = JuMP.@variable(pm.model, [i in 1:total_year], start = 0)
+        Gen_cost = _PM.var(pm)[:Gen_cost] = JuMP.@variable(pm.model, start = 0, lower_bound = 0,)
+        FFRReserves = _PM.var(pm)[:FFR_Reserves] = JuMP.@variable(pm.model, start = 0, lower_bound = 0,)
+        FCRReserves = _PM.var(pm)[:FCR_Reserves] = JuMP.@variable(pm.model, start = 0, lower_bound = 0,)
+        Curt = _PM.var(pm)[:curt] = JuMP.@variable(pm.model, [i in 1:total_year], start = 0, lower_bound = 0,)
+        Cont = _PM.var(pm)[:Cont] = JuMP.@variable(pm.model, start = 0, lower_bound = 0,)
         weights = pm.setting["weights"]
 
         sol_component_value_mod_wonw(pm,   :Gen_cost, Gen_cost)
         sol_component_value_mod_wonw(pm,   :Curt, Curt)
         sol_component_value_mod_wonw(pm,   :FFR_Reserves, FFRReserves)
         sol_component_value_mod_wonw(pm,   :FCR_Reserves, FCRReserves)
-
+        sol_component_value_mod_wonw(pm,   :Cont, Cont)
         for (n, nw_ref) in _PM.nws(pm)
             for (r, reserves) in nw_ref[:reserves]
                 FFR_cost[(n,r)] = reserves["Cf"]
@@ -213,11 +214,11 @@ function objective_min_cost_OPF(pm::_PM.AbstractPowerModel)
         # display(cont_nws)
         Scale = 8760*5 # 5 for no. of gap years between two time steps
         # multiperiod
-        display(JuMP.@constraint(pm.model, Gen_cost == sum(sum(weights[b]*Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) ))
-        display(JuMP.@constraint(pm.model, FFRReserves == sum(weights[b]*FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) ) )
-        display(JuMP.@constraint(pm.model, FCRReserves ==  sum(weights[b]*FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) ) )
-         display(JuMP.@constraint(pm.model, Cont == sum(weights[b]*_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
-         (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) ) )
+        JuMP.@constraint(pm.model, Gen_cost == sum(sum(weights[b]*Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) )
+        JuMP.@constraint(pm.model, FFRReserves == sum(weights[b]*FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) )
+        JuMP.@constraint(pm.model, FCRReserves ==  sum(weights[b]*FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) )
+        JuMP.@constraint(pm.model, Cont == sum(weights[b]*_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
+         (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) )
 
       curtailment = Dict()
       capacity = Dict()
@@ -234,7 +235,8 @@ function objective_min_cost_OPF(pm::_PM.AbstractPowerModel)
         end
           # JuMP.@constraint(pm.model, Curt == sum(sum(Scale*curtailment[(b,c)] for c in curt_gen) for b in base_nws) / sum(sum(Scale*capacity[(b,c)] for c in curt_gen) for b in base_nws) )
           # JuMP.@constraint(pm.model, Curt <= max_curt)
-          return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves +Cont)
+          # return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves + Cont)
+          return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves)
   end
 #
 # #
@@ -257,16 +259,17 @@ function objective_min_cost_OPF_nocl(pm::_PM.AbstractPowerModel)
         FFR_cost = Dict()
         FCR_cost = Dict()
         fail_prob = Dict()
-        Gen_cost = _PM.var(pm)[:Gen_cost] = JuMP.@variable(pm.model, start = 0)
-        FFRReserves = _PM.var(pm)[:FFR_Reserves] = JuMP.@variable(pm.model, start = 0)
-        FCRReserves = _PM.var(pm)[:FCR_Reserves] = JuMP.@variable(pm.model, start = 0)
-        Cont = _PM.var(pm)[:Cont]     = JuMP.@variable(pm.model, start = 0)
-        Curt = _PM.var(pm)[:curt] = JuMP.@variable(pm.model, [i in 1:total_year], start = 0)
+        Gen_cost = _PM.var(pm)[:Gen_cost] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FFRReserves = _PM.var(pm)[:FFR_Reserves] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FCRReserves = _PM.var(pm)[:FCR_Reserves] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        Cont = _PM.var(pm)[:Cont]     = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        Curt = _PM.var(pm)[:curt] = JuMP.@variable(pm.model, [i in 1:total_year], start = 0, lower_bound = 0,)
 
         sol_component_value_mod_wonw(pm,   :Gen_cost, Gen_cost)
         sol_component_value_mod_wonw(pm,   :Curt, Curt)
         sol_component_value_mod_wonw(pm,   :FFR_Reserves, FFRReserves)
         sol_component_value_mod_wonw(pm,   :FCR_Reserves, FCRReserves)
+        sol_component_value_mod_wonw(pm,   :Cont, Cont)
 
         for (n, nw_ref) in _PM.nws(pm)
             for (r, reserves) in nw_ref[:reserves]
@@ -292,15 +295,14 @@ function objective_min_cost_OPF_nocl(pm::_PM.AbstractPowerModel)
 
         Scale = 8760/Total_sample*5 # 5 for no. of gap years between two time steps
         # multiperiod
-        display(JuMP.@constraint(pm.model, Gen_cost == sum(sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) ))
+        JuMP.@constraint(pm.model, Gen_cost == sum(sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) )
 
-        display(JuMP.@constraint(pm.model, FFRReserves == sum(FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) ))
+        JuMP.@constraint(pm.model, FFRReserves == sum(FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) )
 
-       display(JuMP.@constraint(pm.model, FCRReserves ==  sum(FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) ) )
+       JuMP.@constraint(pm.model, FCRReserves ==  sum(FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) )
 
-
-      display(JuMP.@constraint(pm.model, Cont == sum(_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
-                    (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) ) )
+      JuMP.@constraint(pm.model, Cont == sum(_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
+                    (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) )
 
       curtailment = Dict()
       capacity = Dict()
@@ -312,12 +314,13 @@ function objective_min_cost_OPF_nocl(pm::_PM.AbstractPowerModel)
          end
      end
      for y = 1:total_year
-            display(JuMP.@constraint(pm.model, Curt[y] == sum(sum(curtailment[(b,c)] for c in curt_gen) for b in year_base[y]) / sum(sum(capacity[(b,c)] for c in curt_gen) for b in year_base[y])  ) )
+            JuMP.@constraint(pm.model, Curt[y] == sum(sum(curtailment[(b,c)] for c in curt_gen) for b in year_base[y]) / sum(sum(capacity[(b,c)] for c in curt_gen) for b in year_base[y])  )
             JuMP.@constraint(pm.model, Curt[y] <= max_curt)
       end
 
       # display(JuMP.@constraint(pm.model, Curt == sum(sum(Scale*curtailment[(b,c)] for c in curt_gen) for b in base_nws) / sum(sum(Scale*capacity[(b,c)] for c in curt_gen) for b in base_nws) ) )
       # display(JuMP.@constraint(pm.model, Curt <= max_curt))
 
-        return display( JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves +Cont ))
+        # return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves +Cont ) #for validation of TNEP clustering output
+        return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves ) #just for OPF problem
 end

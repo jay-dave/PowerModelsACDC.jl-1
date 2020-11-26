@@ -47,6 +47,7 @@ include("core/base.jl")
 include("core/constraint.jl")
 include("core/constraintfreq.jl")
 include("core/objective.jl")
+include("core/objectivefreq.jl")
 include("core/relaxation_scheme.jl")
 
 include("formdcgrid/acp.jl")
