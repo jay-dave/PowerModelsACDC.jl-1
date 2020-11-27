@@ -234,8 +234,6 @@ function constraint_frequency_stab_TNEP(pm::_PM.AbstractPowerModel)
 end
 
 
-function constraint_frequency_stab_TNEP_MP_PL(pm::_PM.AbstractPowerModel)
-
 function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
     base_nws = pm.setting["base_list"]
     cont_nws = pm.setting["Cont_list"]
@@ -276,8 +274,8 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
 
         JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  >=  Phvdcoaux[i] - JuMP.upper_bound(Phvdcoaux[i])*(1-zbr) )
         JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  <=  Phvdcoaux[i] - JuMP.lower_bound(Phvdcoaux[i])*(1-zbr) )
-        JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  >=  JuMP.lower_bound(Phvdcoaux[i])*(zbr) ) )
-        JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  <=  JuMP.upper_bound(Phvdcoaux[i])*(zbr) ) )
+        JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  >=  JuMP.lower_bound(Phvdcoaux[i])*(zbr) )
+        JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  <=  JuMP.upper_bound(Phvdcoaux[i])*(zbr) )
         #
         JuMP.@constraint(pm.model,  Phvdccaux_dup[i]  >=  Phvdccaux[i] - JuMP.upper_bound(Phvdcoaux[i])*(1-zbr) )
         JuMP.@constraint(pm.model,  Phvdccaux_dup[i]  <=  Phvdccaux[i] - JuMP.lower_bound(Phvdcoaux[i])*(1-zbr) )
