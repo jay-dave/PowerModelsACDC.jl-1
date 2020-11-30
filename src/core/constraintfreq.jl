@@ -25,7 +25,7 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
         JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == 0)
-        # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
+        JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
         JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])
@@ -114,13 +114,13 @@ function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
                 display(JuMP.@constraint(pm.model,  Phvdccaux[i]  <= - Pconv2[k] / load["pd"] +   Mmax*(1-Zb1[k]) ) )
             end
                 JuMP.@constraint(pm.model,  sum(Zb1[k] for k in conv_conn)==1 )
-                # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
+                JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
          elseif pm.setting["NSprotection"] == true
             # display("NSprotection")
             # display(load["pd"])
             display(JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"]))
             display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"]))
-            # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4])
+            JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4])
         end
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
@@ -380,4 +380,84 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
         JuMP.@constraint(pm.model, z1 +z2 + z3+ z4 == 1)
 
     end
+end
+
+
+function constraint_frequency_stab_OPF_MP_PLdim(pm::_PM.AbstractPowerModel)
+    base_nws = pm.setting["base_list"]
+    cont_nws = pm.setting["Cont_list"]
+    ev_syncarea = pm.setting["syncarea"]
+
+    for (base, nw, br) in cont_nws
+        load = _PM.ref(pm, nw, :load, 1) # get index later on
+        syncarea  = _PM.ids(pm, nw, :arcs_reserves_syn)
+        Phvdcoaux = _PM.var(pm, nw)[:Phvdcoaux]
+        Phvdccaux = _PM.var(pm, nw)[:Phvdccaux]
+        Pconv1 = _PM.var(pm, base, :pconv_tf_fr)
+        Pconv2 = _PM.var(pm, nw, :pconv_tf_fr)
+        Zb1 = _PM.var(pm, nw)[:zb1]
+
+        # for i in syncarea # when there is more than one synchornous areas
+        i = ev_syncarea
+        display("connstraint: post_acdcscopf_nocl_PLdim")
+        JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
+        JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
+        JuMP.@constraint(pm.model,  Phvdccaux[i]  == 0)
+
+        JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
+        JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])
+        Pg = _PM.var(pm, nw, :Pgg, i)/load["pd"]
+        Pf = _PM.var(pm, nw, :Pff, i)/load["pd"]
+        reserves = _PM.ref(pm, nw, :reserves)
+        bi_bp = Dict([((reserves["syncarea"]),i ) for (i,reserves) in _PM.ref(pm, nw, :reserves)])
+        Td = reserves[bi_bp[i]]["Td"]
+        Tg= reserves[bi_bp[i]]["Tg"]
+        Tf = reserves[bi_bp[i]]["Tf"]
+        H = reserves[bi_bp[i]]["H"]
+
+        M = 1 # largest possible Pl=0.15 for now
+
+        z1 = _PM.var(pm, nw, :z1, i)
+        z4 = _PM.var(pm, nw, :z4, i)
+        z11 = _PM.var(pm, nw, :z11, i)
+        z41 = _PM.var(pm, nw, :z41, i)
+        z12 = _PM.var(pm, nw, :z12, i)
+        z42 = _PM.var(pm, nw, :z42, i)
+        e = 1e-06
+        p2r = (50/(2*H))
+
+        ############## frequency minimum in interval 1 ##########################################
+         JuMP.@constraint(pm.model,  Phvdcoaux[i]  +e <=   Pf + (Pg/Tg)*Tf + M*(1-z11))
+         JuMP.@constraint(pm.model,  Phvdcoaux[i]  >= Pf + (Pg/Tg)*Tf - M*(z11))
+         JuMP.@constraint(pm.model, 0 <=   Phvdcoaux[i]  + M*(1-z12))
+         JuMP.@constraint(pm.model,  0  >= e +  Phvdcoaux[i]  - M*(z12))
+         JuMP.@constraint(pm.model,  0 <= z11 + z12 - 2*z1)
+         JuMP.@constraint(pm.model,  z11 + z12 - 2*z1 <= 1)
+
+         k11 = _PM.var(pm, nw, :k11, i)
+         k12 = _PM.var(pm, nw, :k12, i)
+
+         JuMP.@constraint(pm.model,k11 ==  (H/50)*(Pg/Tg + Pf/Tf) )
+         JuMP.@constraint(pm.model,k12 ==  (Phvdcoaux[i])/2)
+         JuMP.@constraint(pm.model,k12^2 <=  k11)
+
+         ############## frequency minimum in interval 2 ##########################################
+         JuMP.@constraint(pm.model,  Phvdcoaux[i]  + e <=   Pf + Pg +  M*(1-z41))
+         JuMP.@constraint(pm.model,  Phvdcoaux[i]  >= Pf + Pg   - M*(z41))
+         JuMP.@constraint(pm.model, Pf + (Pg/Tg)*(Tf)   <=   Phvdcoaux[i]  + M*(1-z42))
+         JuMP.@constraint(pm.model,  Pf + (Pg/Tg)*(Tf)   >= e +  Phvdcoaux[i]  - M*(z42))
+         JuMP.@constraint(pm.model,  0 <= z41 + z42 - 2*z4)
+         JuMP.@constraint(pm.model,  z41 + z42 - 2*z4 <= 1)
+
+         k41 = _PM.var(pm, nw, :k41, i)
+         k42 = _PM.var(pm, nw, :k42, i)
+         k43 = _PM.var(pm, nw, :k43, i)
+
+         JuMP.@constraint(pm.model, k41 ==  (H/50 - Pf*Tf/4) )
+         JuMP.@constraint(pm.model, k42 ==  (Pg/Tg) )
+         JuMP.@constraint(pm.model, k43 ==  (Phvdcoaux[i] - Pf )/2 )
+         JuMP.@constraint(pm.model,[k41/sqrt(2), k42/sqrt(2), k43, 0] in JuMP.RotatedSecondOrderCone() )
+
+         JuMP.@constraint(pm.model, z1 + z4 == 1)
+     end
 end

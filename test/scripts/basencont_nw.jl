@@ -113,7 +113,7 @@ end
 
         for i = 1:Total_sample
             # sample = Int(round(8760*(1-rand())))
-            sample = scenario_500[i]
+            sample = scenario[i]
             for tt = 1:2
                 data_ip["nw"]["$kk"]["reserves"]["2"]["H"] = vars["Heq"][sample]
                 if data_ip["nw"]["$kk"]["reserves"]["2"]["H"] < 0.5
@@ -127,6 +127,41 @@ end
                     data_ip["nw"]["$kk"]["gen"]["4"]["pmax"] = vars2["winddata"][sample]/maximum(vars2["winddata"])*rating
                 end
                 data_ip["nw"]["$kk"]["gen"]["3"]["pmax"] = vars["Ptotal"][sample]/100
+                data_ip["nw"]["$kk"]["load"]["1"]["pd"] = vars["Ptotal"][sample]/100
+                # what about load?
+                kk +=1
+            end
+        end
+        end
+        return data_ip
+    end
+
+
+    function mp_datainputs_nocl_PLdim(data_ip, Total_sample, year, year_num, scenario, file)
+        kk= 1
+        for yr = 1:length(year)
+            fname = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\NAT_Results\\",year[yr],"\\output.mat")
+            vars = matread(fname)
+            fname1 = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\NAT_Results\\",year[yr],"\\output_MC.mat")
+            vars1 = matread(fname1)
+            fname2 = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\NAT_Results\\wind_sample.mat")
+            vars2 = matread(fname2)
+
+        for i = 1:Total_sample
+            # sample = Int(round(8760*(1-rand())))
+            sample = scenario[i]
+            for tt = 1:2
+                data_ip["nw"]["$kk"]["reserves"]["2"]["H"] = vars["Heq"][sample]
+                if data_ip["nw"]["$kk"]["reserves"]["2"]["H"] < 0.5
+                    data_ip["nw"]["$kk"]["reserves"]["2"]["H"] = 0.5
+                end
+                data_ip["nw"]["$kk"]["gen"]["2"]["cost"][2] = vars1["MC1"][sample]*100
+                # rating = deepcopy(data_ip["nw"]["$kk"]["gen"]["1"]["pmax"])
+                # data_ip["nw"]["$kk"]["gen"]["1"]["pmax"] = vars2["winddata"][sample]/maximum(vars2["winddata"])*rating
+                if occursin("6bus", file)
+                    data_ip["nw"]["$kk"]["gen"]["4"]["pmax"] = vars2["winddata"][sample]/maximum(vars2["winddata"])*rating
+                end
+                data_ip["nw"]["$kk"]["gen"]["2"]["pmax"] = vars["Ptotal"][sample]/100
                 data_ip["nw"]["$kk"]["load"]["1"]["pd"] = vars["Ptotal"][sample]/100
                 # what about load?
                 kk +=1

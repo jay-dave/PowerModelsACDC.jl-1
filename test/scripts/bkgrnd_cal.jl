@@ -344,3 +344,43 @@ function curtailment(data_cont, base_list, resultDC1, curtailed_gen)
     display("FFRmax: $(maximum(formax))")
      return curt, maximum(formax), maximum(formax1), mean(formax), mean(formax1)
 end
+
+
+function display_keyindictionary_OPF_PLdim(dict, key1, key2)
+    display("################reserves################")
+    for (n, nw) in dict["solution"]["nw"]
+         display("Pgg:n$n $(nw["reserves"]["2"]["Pgg"])")
+    end
+    for (n, nw) in dict["solution"]["nw"]
+     display("Pff:n$n  $(nw["reserves"]["2"]["Pff"])")
+    end
+
+    display("################interval################")
+    for (n, nw) in dict["solution"]["nw"]
+    display("z1:n$n $(nw["reserves"]["2"]["z1"]) z2: $(nw["reserves"]["2"]["z2"]) z3: $(nw["reserves"]["2"]["z3"]) z4: $(nw["reserves"]["2"]["z4"])  z5: $(nw["reserves"]["2"]["z5"])")
+    end
+    display("################gen################")
+    for (n, nw) in dict["solution"]["nw"]
+    display("Pg1:n$n $(nw["gen"]["1"]["pg"])  Pg2: $(nw["gen"]["2"]["pg"])")
+    end
+    display("################branch################")
+    for (n, nw) in dict["solution"]["nw"]
+    # display("b1:n$n $(nw["branchdc_ne"]["1"]["pf"])  b2: $(nw["branchdc_ne"]["2"]["pf"]) b3: $(nw["branchdc_ne"]["3"]["pf"]) b4: $(nw["branchdc_ne"]["4"]["pf"])")
+        display("n$n:b1: $(nw["branchdc"]["1"]["pf"]) ")
+        # display("n$n:b5: $(nw["branchdc_ne"]["5"]["pf"])  b6: $(nw["branchdc_ne"]["6"]["pf"])")
+        # b7: $(nw["branchdc_ne"]["7"]["pf"]) b8: $(nw["branchdc_ne"]["8"]["pf"]) )
+        #display("n$n:b9: $(nw["branchdc_ne"]["9"]["pf"])  b10: $(nw["branchdc_ne"]["10"]["pf"]) b11: $(nw["branchdc_ne"]["11"]["pf"]) b12: $(nw["branchdc_ne"]["12"]["pf"]) ")
+    end
+    display("################Power deviation################")
+    display("Phvdc,open: $(dict["solution"]["nw"]["2"]["reserves"]["2"]["Phvdcoaux"])")
+    for (n, nw) in dict["solution"]["nw"]
+        display("Phvdc,open:n$n $(nw["reserves"]["2"]["Phvdcoaux"])")
+        display("Phvdc,close:n$n $(nw["reserves"]["2"]["Phvdccaux"])")
+    end
+
+    display("$(dict["solution"]["nw"]["1"]["FCR_Reserves"])")
+    display("$(dict["solution"]["nw"]["1"]["FFR_Reserves"])")
+    display("$(dict["solution"]["nw"]["1"]["Gen_cost"])")
+    # display("$(dict["solution"]["nw"]["1"]["Cont"])")
+    display("$(dict["objective"])")
+end

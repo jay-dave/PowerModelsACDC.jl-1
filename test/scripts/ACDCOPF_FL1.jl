@@ -12,7 +12,7 @@ using JLD2
 using Statistics
 include("basencont_nw.jl")
 
-Total_sample = 500  # sample per year
+Total_sample = 50  # sample per year
 total_yr = 6# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
@@ -62,9 +62,9 @@ for proti = 1:3
     @assert ( s["FSprotection"] == true && (Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB") ) || (s["NSprotection"] == true && (Prot_system == "NS_CB" || Prot_system == "NS_FB"))|| (Prot_system == "Permanentloss" && s["NSprotection"] == false && s["FSprotection"] == false)
     conv_rate = Int(data_cont["nw"]["1"]["convdc"]["1"]["Pacmax"]*100)
     if occursin("4bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\wthFCRlim\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
     elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\wthFCRlim\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
     end
 
     for (n,nw) in data_cont["nw"]
@@ -79,8 +79,8 @@ for proti = 1:3
      end
 
     resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-    display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
-    display(curtailed_gen)
+    # display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
+    # display(curtailed_gen)
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf
         sheet = xf[1]
@@ -266,7 +266,7 @@ end
 # end
 ######################end FCR time############################
 
-#####################start Curtailemnt percentage############################
+# #####################start Curtailemnt percentage############################
 #     curtl = [0.1 0.2 0.3]
 #     column = ["A" "B" "C" "D" "E" "F" "G" "H"]
 #     filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\Curtailment-copy1\\",Prot_system,".xlsx")
