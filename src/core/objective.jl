@@ -236,7 +236,7 @@ function objective_min_cost_OPF(pm::_PM.AbstractPowerModel)
           # JuMP.@constraint(pm.model, Curt == sum(sum(Scale*curtailment[(b,c)] for c in curt_gen) for b in base_nws) / sum(sum(Scale*capacity[(b,c)] for c in curt_gen) for b in base_nws) )
           # JuMP.@constraint(pm.model, Curt <= max_curt)
           # return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves + Cont)
-          return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves)
+          return  JuMP.@objective(pm.model, Min,  FFRReserves + FCRReserves)
   end
 #
 # #
@@ -322,7 +322,7 @@ function objective_min_cost_OPF_nocl(pm::_PM.AbstractPowerModel)
       # display(JuMP.@constraint(pm.model, Curt <= max_curt))
 
         # return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves +Cont ) #for validation of TNEP clustering output
-        return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves ) #just for OPF problem
+        return  JuMP.@objective(pm.model, Min,  FFRReserves + FCRReserves ) #just for OPF problem
 end
 
 function objective_min_cost_OPF_nocl_PLdim(pm::_PM.AbstractPowerModel)
@@ -401,5 +401,5 @@ function objective_min_cost_OPF_nocl_PLdim(pm::_PM.AbstractPowerModel)
       # display(JuMP.@constraint(pm.model, Curt <= max_curt))
 
         # return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves +Cont ) #for validation of TNEP clustering output
-        return  JuMP.@objective(pm.model, Min, Gen_cost + FFRReserves + FCRReserves ) #just for OPF problem
+        return  JuMP.@objective(pm.model, Min, FFRReserves + FCRReserves ) #just for OPF problem
 end
