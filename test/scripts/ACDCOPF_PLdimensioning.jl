@@ -27,7 +27,7 @@ max_curt = 0
     _PMACDC.process_additional_data!(data_sp)
 
     include("bkgrnd_cal.jl")
-    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "Presolve" => -1, "MIPGap" => 0.1)
+    gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "Presolve" => -1)
 
     no_nw = 2 * Total_sample*total_yr
     data_mp = multi_network(file, no_nw)

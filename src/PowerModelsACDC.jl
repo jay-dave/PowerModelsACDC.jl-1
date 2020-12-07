@@ -35,7 +35,7 @@ include("prob/mp_tnepopf.jl")
 include("prob/mp_acdctnepopf.jl")
 include("prob/mp_tnepopf_bf.jl")
 include("prob/mp_acdctnepopf_bf.jl")
-
+include("prob/tnepscopf.jl")
 
 
 include("core/solution.jl")
@@ -69,4 +69,6 @@ include("formconv/shared.jl")
 include("core/constraint_template.jl")
 include("io/multinetwork.jl")
 include("io/results.jl")
+
+
  end

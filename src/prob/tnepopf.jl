@@ -50,6 +50,7 @@ function post_tnepopf(pm::_PM.AbstractPowerModel)
         _PM.constraint_thermal_limit_from(pm, i)
         _PM.constraint_thermal_limit_to(pm, i)
     end
+
     for i in _PM.ids(pm, :busdc)
         constraint_power_balance_dc_dcne(pm, i)
     end

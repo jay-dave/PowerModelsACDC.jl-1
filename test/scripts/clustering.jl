@@ -113,3 +113,12 @@ scenario, weight = collect_scenario(year)
 # b = [ParallelKMeans.kmeans(features, i, n_threads=1; tol=1e-6, max_iters=300, verbose=false).totalcost for i = 2:10]
 # # Multi-threaded Implementation of Lloyd's Algorithm by default
 # c = [ParallelKMeans.kmeans(features, i; tol=1e-6, max_iters=300, verbose=false).totalcost for i = 2:10]
+
+# scenarios = scenario_500[1:10]
+# weights = [1,1,1,1,1,1,1,1,1,1]
+# @save "cluster_2025.jld2" scenarios = scenarios weights = weights
+# @save "cluster_2030.jld2" scenarios = scenarios weights = weights
+# @save "cluster_2035.jld2" scenarios = scenarios weights = weights
+# @save "cluster_2040.jld2" scenarios = scenarios weights = weights
+# @save "cluster_2045.jld2" scenarios = scenarios weights = weights
+# @save "cluster_2050.jld2" scenarios = scenarios weights = weights

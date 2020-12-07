@@ -37,7 +37,7 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
         Tg= reserves[bi_bp[i]]["Tg"]
         Tf = reserves[bi_bp[i]]["Tf"]
         H = reserves[bi_bp[i]]["H"]
-
+        Tcl = reserves[bi_bp[i]]["Tcl"]
         M = 1 # largest possible Pl=0.15 for now
 
         z1 = _PM.var(pm, nw, :z1, i)
@@ -238,7 +238,7 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
     base_nws = pm.setting["base_list"]
     cont_nws = pm.setting["Cont_list"]
     ev_syncarea = pm.setting["syncarea"]
-
+    display("constraint_frequency_stab_TNEP_MP_FSNS")
     for (base, nw, br) in cont_nws
         load = _PM.ref(pm, nw, :load, 1) # get index later on
         syncarea  = _PM.ids(pm, nw, :arcs_reserves_syn_ne)
@@ -270,7 +270,7 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
         JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])
-        zbr = _PM.var(pm, nw, :branch_ne, br)
+        zbr = _PM.var(pm, nw, :branchdc_ne, br)
 
         JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  >=  Phvdcoaux[i] - JuMP.upper_bound(Phvdcoaux[i])*(1-zbr) )
         JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  <=  Phvdcoaux[i] - JuMP.lower_bound(Phvdcoaux[i])*(1-zbr) )
@@ -290,7 +290,7 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
         Tg= reserves[bi_bp[i]]["Tg"]
         Tf = reserves[bi_bp[i]]["Tf"]
         H = reserves[bi_bp[i]]["H"]
-
+        Tcl = reserves[bi_bp[i]]["Tcl"]
         M = 1 # largest possible Pl=0.15 for now
         z1 = _PM.var(pm, nw, :z1, i)
         z2 = _PM.var(pm, nw, :z2, i)
@@ -318,7 +318,6 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
 
          k11 = _PM.var(pm, nw, :k11, i)
          k12 = _PM.var(pm, nw, :k12, i)
-         k13 = _PM.var(pm, nw, :k13, i)
 
          JuMP.@constraint(pm.model,k11 ==  (H/50)*(Pg/Tg + Pf/Tf) )
          JuMP.@constraint(pm.model,k12 ==  (Phvdcoaux_dup[i])/2)

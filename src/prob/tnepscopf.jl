@@ -1,19 +1,19 @@
-export run_mp_tnepscopf, run_mp_tnepscopf_nocl
+export run_mp_tnepscopf
 
 ""
 function run_mp_tnepscopf(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
-    return run_mp_tnepscopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], kwargs...)
+    return run_mp_tnepscopf(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!,add_ref_frequency_candidates!], kwargs...)
 end
 
 ""
-function run_mp_tnepscopf(data::Dict{String,Any}, model_type::Type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
+function run_mp_tnepscopf(data::Dict{String,Any}, model_type::Type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, add_ref_frequency_candidates!], setting = s, kwargs...)
     if setting["process_data_internally"] == true
         # PowerModelsACDC.process_additional_data!(data)
         process_additional_data!(data)
     end
     s = setting
-    return _PM.run_model(data, model_type, solver, post_mp_tnepscopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
+    return _PM.run_model(data, model_type, solver, post_mp_tnepscopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!, add_ref_frequency_candidates!], setting = s, kwargs...)
     # pm = _PM.build_model(data, model_type, post_mp_tnepscopf; setting = s, kwargs...)
     # return _PM.optimize_model!(pm, solver; solution_builder = get_solution_acdc_ne)
 end
@@ -43,7 +43,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
         variable_dc_converter_ne(pm; nw = n) # add more variables in variableconv.jl
         variable_dcbranch_current_ne(pm; nw = n)
         variable_dcgrid_voltage_magnitude_ne(pm; nw = n)
-        variable_frequency_stab_TNEP(pm; nw = n)
+        variable_frequency_stab_ne(pm; nw = n)
      end
     objective_min_cost_TNEP(pm)
     for (n, networks) in pm.ref[:nw]
@@ -55,7 +55,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :bus)
-            constraint_kcl_shunt_ne(pm, i; nw = n)
+            constraint_power_balance_ac_dcne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branch)
@@ -67,10 +67,10 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :busdc)
-            constraint_kcl_shunt_dcgrid_ne(pm, i; nw = n)
+            constraint_power_balance_dc_dcne(pm, i; nw = n)
         end
         for i in _PM.ids(pm, n, :busdc_ne)
-            constraint_kcl_shunt_dcgrid_ne_bus(pm, i; nw = n)
+            constraint_power_balance_dcne_dcne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branchdc)
@@ -81,7 +81,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
             constraint_ohms_dc_branch_ne(pm, i; nw = n)
             constraint_branch_limit_on_off(pm, i; nw = n)
             if n > 1
-                constraint_candidate_branches_mp(pm, n, i)
+                constraint_candidate_dcbranches_mp(pm, n, i)
             end
         end
 
@@ -106,7 +106,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
             constraint_conv_reactor_ne(pm, i; nw = n)
             constraint_conv_filter_ne(pm, i; nw = n)
 
-            #display(pm.ref)
+
             if pm.ref[:nw][n][:convdc_ne][i]["islcc"] == 1
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end
@@ -117,27 +117,27 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
 end
 
 
-"for no clustering"
+# "for no clustering"
 ""
 function run_mp_tnepscopf_nocl(file::String, model_type::Type, solver; kwargs...)
     data = _PM.parse_file(file)
-    return run_mp_tnepscopf_nocl(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], kwargs...)
+    return run_mp_tnepscopf_nocl(data, model_type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!,add_ref_frequency_candidates!], kwargs...)
 end
 
 ""
-function run_mp_tnepscopf_nocl(data::Dict{String,Any}, model_type::Type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
+function run_mp_tnepscopf_nocl(data::Dict{String,Any}, model_type::Type, solver; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!,add_ref_frequency_candidates!], setting = s, kwargs...)
     if setting["process_data_internally"] == true
         # PowerModelsACDC.process_additional_data!(data)
         process_additional_data!(data)
     end
     s = setting
-    return _PM.run_model(data, model_type, solver, post_mp_tnepscopf_nocl; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
+    return _PM.run_model(data, model_type, solver, post_mp_tnepscopf_nocl; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!,add_ref_frequency_candidates!], setting = s, kwargs...)
     # pm = _PM.build_model(data, model_type, post_mp_tnepscopf; setting = s, kwargs...)
     # return _PM.optimize_model!(pm, solver; solution_builder = get_solution_acdc_ne)
 end
 
 ""
-function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
+function post_mp_tnepscopf_nocl(pm::_PM.AbstractPowerModel)
     # for (n, networks) in pm.ref[:nw]
     #     PowerModelsACDC.add_ref_dcgrid!(pm, n)
     #     add_candidate_dcgrid!(pm, n)
@@ -161,7 +161,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
         variable_dc_converter_ne(pm; nw = n) # add more variables in variableconv.jl
         variable_dcbranch_current_ne(pm; nw = n)
         variable_dcgrid_voltage_magnitude_ne(pm; nw = n)
-        variable_frequency_stab_TNEP(pm; nw = n)
+        variable_frequency_stab_ne(pm; nw = n)
      end
     objective_min_cost_TNEP_nocl(pm)
     for (n, networks) in pm.ref[:nw]
@@ -173,7 +173,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :bus)
-            constraint_kcl_shunt_ne(pm, i; nw = n)
+            constraint_power_balance_ac_dcne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branch)
@@ -185,10 +185,10 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
         end
 
         for i in _PM.ids(pm, n, :busdc)
-            constraint_kcl_shunt_dcgrid_ne(pm, i; nw = n)
+            constraint_power_balance_dc_dcne(pm, i; nw = n)
         end
         for i in _PM.ids(pm, n, :busdc_ne)
-            constraint_kcl_shunt_dcgrid_ne_bus(pm, i; nw = n)
+            constraint_power_balance_dcne_dcne(pm, i; nw = n)
         end
 
         for i in _PM.ids(pm, n, :branchdc)
@@ -199,7 +199,7 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
             constraint_ohms_dc_branch_ne(pm, i; nw = n)
             constraint_branch_limit_on_off(pm, i; nw = n)
             if n > 1
-                constraint_candidate_branches_mp(pm, n, i)
+                constraint_candidate_dcbranches_mp(pm, n, i)
             end
         end
 
@@ -224,7 +224,6 @@ function post_mp_tnepscopf(pm::_PM.AbstractPowerModel)
             constraint_conv_reactor_ne(pm, i; nw = n)
             constraint_conv_filter_ne(pm, i; nw = n)
 
-            #display(pm.ref)
             if pm.ref[:nw][n][:convdc_ne][i]["islcc"] == 1
                 constraint_conv_firing_angle_ne(pm, i; nw = n)
             end

@@ -467,6 +467,7 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
     end
 end
 
+
 function add_ref_frequency!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
     for (n, nw_ref) in ref[:nw]
         nw_ref[:reserves] = Dict([x for x in nw_ref[:reserves]])
@@ -530,7 +531,6 @@ function add_ref_frequency_candidates!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
         end
     end
         nw_ref[:bus_convs_dirct_ne] =   bus_convs_dirct_ne
-    end
 
                 nw_ref[:arcs_sync_conv_ne] = [(i,conv["busac_i"],conv["syncarea"]) for (i,conv) in nw_ref[:convdc_ne]]
                 nw_ref[:reserves] = Dict([x for x in nw_ref[:reserves]])
@@ -567,6 +567,7 @@ function add_ref_frequency_candidates!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
                 for (i,conv) in nw_ref[:convdc_ne]
                      push!(bus_syc_arc_ne[conv["busac_i"]],conv["syncarea"])
                 end
+            end
 end
 
 

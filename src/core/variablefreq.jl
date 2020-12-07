@@ -161,6 +161,7 @@ function variable_frequency_power_dev(pm::_PM.AbstractPowerModel; nw::Int=pm.cnw
     Phvdccaux = _PM.var(pm, nw)[:Phvdccaux] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_Phvdccaux", lower_bound = 0, start = 0)
 
+
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdcoaux, _PM.ids(pm, nw, :arcs_reserves_syn), Phvdcoaux)
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdccaux, _PM.ids(pm, nw, :arcs_reserves_syn), Phvdccaux)
 
@@ -174,8 +175,16 @@ function variable_frequency_power_dev_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.
     Phvdccaux = _PM.var(pm, nw)[:Phvdccaux] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_Phvdccaux", lower_bound = 0, start = 0)
 
+    Phvdcoaux_dup = _PM.var(pm, nw)[:Phvdcoaux_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_Phvdcoaux_dup", lower_bound = 0, start = 0)
+
+    Phvdccaux_dup = _PM.var(pm, nw)[:Phvdccaux_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_Phvdccaux_dup", lower_bound = 0, start = 0)
+    
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdcoaux, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdcoaux)
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdccaux, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdccaux)
+    report && _IM.sol_component_value(pm, nw, :reserves, :Phvdcoaux_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdcoaux_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :Phvdccaux_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdccaux_dup)
 
 end
 
@@ -234,4 +243,8 @@ function variable_frequency_power_dev_aux_ne(pm::_PM.AbstractPowerModel; nw::Int
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k42", start = 0)
     k43 = _PM.var(pm, nw)[:k43] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k43", start = 0)
+end
+
+function sol_component_value_mod(pm::_PM.AbstractPowerModel, n::Int, comp_name::Symbol, variables)
+    _PM.sol(pm, n)[comp_name] = variables
 end
