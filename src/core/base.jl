@@ -143,8 +143,8 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
         end
 
         nw_ref[:bus_convs_dirct] =   bus_convs_dirct
-        # display("bus_convs_dirct")
-        # display(bus_convs_dirct)
+        display("bus_convs_dirct")
+        display(bus_convs_dirct)
 
             # display("nw)ref")
             # display(nw_ref)
@@ -408,6 +408,8 @@ function add_candidate_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any}
             nw_ref[:arcs_dcgrid_ne] = [nw_ref[:arcs_dcgrid_from_ne]; nw_ref[:arcs_dcgrid_to_ne]]
             nw_ref[:arcs_conv_acdc_ne] = [(i,conv["busac_i"],conv["busdc_i"]) for (i,conv) in nw_ref[:convdc_ne]]
             nw_ref[:arcs_conv_acdc_acbus_ne] = [(i,conv["busac_i"]) for (i,conv) in nw_ref[:convdc_ne]]
+            nw_ref[:arcs_incident_ne] = [(i, incident["convdc"]) for (i,incident) in nw_ref[:incident]]
+
             #bus arcs of the DC grid
             bus_arcs_dcgrid_ne = Dict([(bus["busdc_i"], []) for (i,bus) in nw_ref[:busdc_ne]])
             for (l,i,j) in nw_ref[:arcs_dcgrid_ne]
@@ -545,11 +547,23 @@ function add_ref_frequency_candidates!(ref::Dict{Symbol,<:Any}, data::Dict{Strin
                 end
                 nw_ref[:bus_arcs_load_ne] = bus_arcs_load_ne
 
+                #old
                 bus_arcs_conv_ne = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
                 for (l,i,j) in nw_ref[:arcs_sync_conv_ne]
                     push!(bus_arcs_conv_ne[j], l)
                 end
                 nw_ref[:bus_arcs_conv_ne] = bus_arcs_conv_ne
+
+                #new
+                bus_arcs_incident_ne = Dict([(i, []) for (i,branch) in nw_ref[:branchdc_ne]])
+                for (i,incident) in nw_ref[:incident]
+                    for b = 1: length(incident)-3
+                        if incident["br$(b)"] == 1
+                        push!(bus_arcs_incident_ne[b], incident["convdc"])
+                        end
+                    end
+                end
+                nw_ref[:bus_arcs_incident_ne] = bus_arcs_incident_ne
 
                 bus_arcs_sync_ne = Dict([(reserve["syncarea"], []) for (i,reserve) in nw_ref[:reserves]])
                 for (l,i,j) in nw_ref[:arcs_sync_conv_ne]

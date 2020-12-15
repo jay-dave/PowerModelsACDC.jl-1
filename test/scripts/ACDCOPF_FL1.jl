@@ -13,10 +13,10 @@ using Statistics
 include("basencont_nw.jl")
 
 Total_sample = 50  # sample per year
-total_yr = 6# the years in horizon, data coming from excels
+total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
-# Prot_system = "FS_MDCCB"
+# Prot_system = "FS_HDCCB"
 Prot_system_coll = ["FS_HDCCB", "NS_CB", "Permanentloss"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
@@ -33,8 +33,8 @@ for proti = 1:3
 
     no_nw = 2 * Total_sample*total_yr
     data_mp = multi_network(file, no_nw)
-    year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
-    year_num = ["2025", "2030", "2035", "2040", "2045", "2050"]
+    year = ["NAT_2025_Generation","NAT_2035_Generation", "NAT_2045_Generation"]
+    year_num = ["2025", "2035", "2045"]
     # year = ["NAT_2050_Generation"]
     yr = 1
 
@@ -64,23 +64,23 @@ for proti = 1:3
 
     for (n,nw) in data_cont["nw"]
                 for (r,reserves) in nw["reserves"]
-                     if Prot_system == "FS_HDCCB"; reserves["Tcl"] = 0.5
+                     if Prot_system == "FS_HDCCB"; reserves["Tcl"] = 0.148
                      elseif Prot_system == "FS_MDCCB"; reserves["Tcl"] = 0.293
                      elseif Prot_system == "NS_FB"; reserves["Tcl"] = 0.100
-                     elseif Prot_system == "NS_CB"; reserves["Tcl"] = 0.5
+                     elseif Prot_system == "NS_CB"; reserves["Tcl"] = 0.150
                      elseif Prot_system == "Permanentloss"; reserves["Tcl"] = 100
                      end
                  end
      end
 
      if occursin("4bus", file)
-         filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\woFCRlim_300ms\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
+         filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\wthFCRlim\\",conv_rate,"MW\\",Prot_system,"_cl.xlsx")
      elseif occursin("6bus", file)
-         filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\6bus\\injection\\woFCRlim_300ms\\",conv_rate,"MW\\",Prot_system,"_s.xlsx")
+         filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\injection\\wthFCRlim\\",conv_rate,"MW\\",Prot_system,"_cl.xlsx")
      end
 
     resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-    # display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
+    display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
     # display(curtailed_gen)
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf
@@ -89,7 +89,7 @@ for proti = 1:3
         sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
         sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
         sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-        sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
+        sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
         # sheet["$(string("A",5))"] = sum(curtail)
         sheet["$(string("A",6))"] = resultDC1["objective"]
         sheet["$(string("A",7))"] = maxFFR
@@ -273,27 +273,25 @@ end
 #     filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\Curtailment-copy1\\",Prot_system,".xlsx")
 #     XLSX.openxlsx(filepath, mode="w") do xf
 #              for i = 1:length(curtl)
-#
 #                 s["max_curt"] = curtl[i]
 #                 resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork=true; setting = s)
 #                 curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
 #                 sheet = xf[1]
 #                 cell_no = string(column[i],i)
 #                 display(cell_no)
-#                 sheet["$(string(column[i],1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-#                 sheet["$(string(column[i],2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-#                 sheet["$(string(column[i],3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-#                 sheet["$(string(column[i],4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-#                 # sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
-#                 sheet["$(string(column[i],5))"] = mean(resultDC1["solution"]["nw"]["1"]["Curt"])
-#                 sheet["$(string(column[i],6))"] = resultDC1["objective"]
-#                 sheet["$(string(column[i],7))"] = maxFFR
-#                 sheet["$(string(column[i],8))"] = maxFCR
-#                 sheet["$(string(column[i],9))"] = resultDC1["objective_lb"]
-#                 sheet["$(string(column[i],10))"] = meanFFR
-#                 sheet["$(string(column[i],11))"] = meanFCR
-#                 display("i: $i")
-#             end
+#                     sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
+#                     sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+#                     sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+#                     sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+#                     sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
+#                     # sheet["$(string("A",5))"] = sum(curtail)
+#                     sheet["$(string("A",6))"] = resultDC1["objective"]
+#                     sheet["$(string("A",7))"] = maxFFR
+#                     sheet["$(string("A",8))"] = maxFCR
+#                     sheet["$(string("A",9))"] = resultDC1["objective_lb"]
+#                     sheet["$(string("A",10))"] = meanFFR
+#                     sheet["$(string("A",11))"] = meanFCR
+#              end
 #    end
 # end
 

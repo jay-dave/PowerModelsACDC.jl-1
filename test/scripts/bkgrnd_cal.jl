@@ -58,8 +58,8 @@ function display_keyindictionary(dict, key1, key2)
     display("################Power deviation################")
     display("Phvdc,open: $(dict["solution"]["nw"]["2"]["reserves"]["2"]["Phvdcoaux"])")
     for (n, nw) in dict["solution"]["nw"]
-        display("Phvdc,open:n$n $(nw["reserves"]["2"]["Phvdcoaux"])")
-         display("Phvdc,close:n$n $(nw["reserves"]["2"]["Phvdccaux"])")
+        display("Phvdcdup,open:n$n $(nw["reserves"]["2"]["Phvdcoaux_dup"])")
+         display("Phvdcdup,close:n$n $(nw["reserves"]["2"]["Phvdccaux_dup"])")
     end
 
     display("Invcost: $(dict["solution"]["nw"]["1"]["Inv_cost"])")
@@ -137,7 +137,6 @@ end
 function Protectionsystemcost_4bus(data, PS, no_nw)
     #no cost of permanent cost, ac side protection
     for (n,nw) in data["nw"]
-        display("nw:$n")
         if PS == "FS_HDCCB"
                   nw["convdc_ne"]["3"]["cost"] = 274.13/no_nw; nw["convdc_ne"]["4"]["cost"] = 274.13/no_nw; nw["convdc_ne"]["2"]["cost"] = 360.32/no_nw; nw["convdc_ne"]["1"]["cost"] = 360.32/no_nw
                   # nw["convdc_ne"]["5"]["cost"] = 143.56/no_nw; nw["convdc_ne"]["6"]["cost"] = 143.56/no_nw; nw["convdc_ne"]["7"]["cost"] = 189.27/no_nw; nw["convdc_ne"]["8"]["cost"] = 189.27/no_nw
@@ -205,7 +204,7 @@ function Protectionsystemcost_4bus(data, PS, no_nw)
                nw["convdc_ne"]["3"]["cost"] = 263.28/no_nw; nw["convdc_ne"]["4"]["cost"] = 263.28/no_nw; nw["convdc_ne"]["2"]["cost"] = 342.26/no_nw; nw["convdc_ne"]["1"]["cost"] = 342.26/no_nw
                # nw["convdc_ne"]["5"]["cost"] = 176.91/no_nw; nw["convdc_ne"]["6"]["cost"] = 176.91/no_nw; nw["convdc_ne"]["7"]["cost"] = 229.98/no_nw; nw["convdc_ne"]["8"]["cost"] = 229.98/no_nw
 
-               nw["branchdc_ne"]["1"]["cost"] = 315/no_nw; nw["branchdc_ne"]["2"]["cost"] = 315/no_nw; nw["branchdc_ne"]["3"]["cost"] = 630/no_nw
+               nw["branchdc_ne"]["1"]["cost"] = 315/no_nw; nw["branchdc_ne"]["2"]["cost"] = 315/no_nw; nw["branchdc_ne"]["3"]["cost"] = 315/no_nw
                nw["branchdc_ne"]["4"]["cost"] = 210/no_nw; nw["branchdc_ne"]["5"]["cost"] = 735/no_nw;
                nw["branchdc_ne"]["6"]["cost"] = 315/no_nw; nw["branchdc_ne"]["7"]["cost"] = 315/no_nw;
                nw["branchdc_ne"]["8"]["cost"] = 367.5/no_nw;
@@ -218,7 +217,6 @@ function Protectionsystemcost_6bus(data, PS, no_nw)
     #no cost of permanent cost, ac side protection
     no_nw = no_nw
     for (n,nw) in data["nw"]
-        display("nw:$n")
         if PS == "FS_HDCCB"
                   nw["convdc_ne"]["1"]["cost"] = 274.13*0.5/no_nw; nw["convdc_ne"]["2"]["cost"] = 274.13/no_nw; nw["convdc_ne"]["6"]["cost"] = 274.13/no_nw;
                   nw["convdc_ne"]["3"]["cost"] = 360.32*0.5/no_nw; nw["convdc_ne"]["4"]["cost"] = 360.32/no_nw; nw["convdc_ne"]["5"]["cost"] = 360.32/no_nw;

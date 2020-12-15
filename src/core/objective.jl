@@ -212,13 +212,13 @@ function objective_min_cost_OPF(pm::_PM.AbstractPowerModel)
         # display(gen_cost)
         # display(base_nws)
         # display(cont_nws)
-        Scale = 8760*5 # 5 for no. of gap years between two time steps
+        Scale = 8760*10 # 5 for no. of gap years between two time steps
         # multiperiod
         JuMP.@constraint(pm.model, Gen_cost == sum(sum(weights[b]*Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) )
         JuMP.@constraint(pm.model, FFRReserves == sum(weights[b]*FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) )
         JuMP.@constraint(pm.model, FCRReserves ==  sum(weights[b]*FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) )
-        JuMP.@constraint(pm.model, Cont == sum(weights[b]*_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
-         (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) )
+        # JuMP.@constraint(pm.model, Cont == sum(weights[b]*_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
+        #  (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) )
 
       curtailment = Dict()
       capacity = Dict()
@@ -293,7 +293,7 @@ function objective_min_cost_OPF_nocl(pm::_PM.AbstractPowerModel)
 
         # display("#####################################cost of conv and branch")
 
-        Scale = 8760/Total_sample*5 # 5 for no. of gap years between two time steps
+        Scale = 8760/Total_sample*10 # 5 for no. of gap years between two time steps
         # multiperiod
         JuMP.@constraint(pm.model, Gen_cost == sum(sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) )
 
@@ -301,8 +301,8 @@ function objective_min_cost_OPF_nocl(pm::_PM.AbstractPowerModel)
 
        JuMP.@constraint(pm.model, FCRReserves ==  sum(FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) )
 
-      JuMP.@constraint(pm.model, Cont == sum(_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
-                    (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) )
+      # JuMP.@constraint(pm.model, Cont == sum(_PM.ref(pm, b, :branchdc, br)["fail_prob"]*
+      #               (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) )
 
       curtailment = Dict()
       capacity = Dict()

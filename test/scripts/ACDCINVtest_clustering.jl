@@ -13,16 +13,17 @@ using Statistics, FileIO
 
 include("basencont_nw.jl")
 Total_sample = 10  # samples per yearsum()
-total_yr = 3  # the years in horizon, data coming from excels
+total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
-Prot_system = "NS_CB"
+# Prot_system = "NS_CB"
 # Prot_system_coll = ["NS_CB"]
+Prot_system_coll = ["FS_HDCCB", "NS_CB"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
 max_curt = 1
 cost = Any[]
-# for proti = 1:1
-#     Prot_system = Prot_system_coll[proti]
+for proti = 1:3
+    Prot_system = Prot_system_coll[proti]
     file = "./test/data/4bus_TNEP.m"
     data_sp = _PM.parse_file(file)
     _PMACDC.process_additional_data!(data_sp)
@@ -37,12 +38,12 @@ cost = Any[]
 
     year = ["NAT_2025_Generation","NAT_2035_Generation", "NAT_2045_Generation"]
     year_num = ["2025", "2035", "2045"]
-    # year_num = ["2030"]
-    # year = ["NAT_2030_Generation"]
+    # year_num = ["2035"]
+    # year = ["NAT_2035_Generation"]
     yr = 1
     # @load "scenario.jld2"
 
-    data_ps, cost = mp_datainputs_ne(deepcopy(data_mp), Total_sample)
+    data_ps, cost = mp_datainputs_ne(deepcopy(data_mp), Total_sample, year, year_num,file)
     base_weight_ip = Array{Float64}(undef, 1, no_nw)
     @save "costt.jld2" cost
     @load "cluster.jld2"
@@ -88,24 +89,24 @@ cost = Any[]
     resultDC1 = _PMACDC.run_mp_tnepscopf(data_cont1, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
     display_keyindictionary(resultDC1, "isbuilt", "Pgg")
     built_cv, built_br = _PMACDC.display_results_tnep_mp(resultDC1)
-    curtail, maxFFR = curtailment(data_cont1, base_list, resultDC1, curtailed_gen)
+    # curtail, maxFFR = curtailment(data_cont1, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf
         sheet = xf[1]
         sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
         sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
         sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
         sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-        sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
-        # sheet["$(string("A",5))"] = sum(curtail)
+        sheet["$(string("A",5))"] = mean(resultDC1["solution"]["nw"]["1"]["Curt"])
+        # sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Cont"])
         sheet["$(string("A",6))"] = resultDC1["objective"]
-        sheet["$(string("A",7))"] = maxFFR
-        sheet["$(string("A",8))"] = sum(curtail)
+        sheet["$(string("A",7))"] = 0
+        sheet["$(string("A",8))"] = 0
         sheet["$(string("A",9))"] = resultDC1["solution"]["nw"]["1"]["Inv_cost"]
         sheet["$(string("A",10))"] = built_cv
         sheet["$(string("A",11))"] = built_br
         sheet["$(string("A",12))"] = resultDC1["objective_lb"]
     end
-# end
+end
 ######################start inertia############################
 # inertia = 1:0.5:4
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]

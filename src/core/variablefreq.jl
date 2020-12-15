@@ -121,7 +121,7 @@ function variable_frequency_reserves_bin_ne(pm::_PM.AbstractPowerModel; nw::Int=
     report && _IM.sol_component_value(pm, nw, :reserves, :z2, _PM.ids(pm, nw, :arcs_reserves_syn_ne), z2)
     report && _IM.sol_component_value(pm, nw, :reserves, :z3, _PM.ids(pm, nw, :arcs_reserves_syn_ne), z3)
     report && _IM.sol_component_value(pm, nw, :reserves, :z4, _PM.ids(pm, nw, :arcs_reserves_syn_ne), z4)
-    report && _IM.sol_component_value(pm, nw, :convdc, :zb1, _PM.ref(pm, nw, :bus_arcs_conv_ne, ev_syncarea), zb1)
+    report && _IM.sol_component_value(pm, nw, :convdc_ne, :zb1, _PM.ref(pm, nw, :bus_arcs_conv_ne, ev_syncarea), zb1)
 
     z11 = _PM.var(pm, nw)[:z11] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_z11", binary = true, start = 0 )
@@ -180,7 +180,7 @@ function variable_frequency_power_dev_ne(pm::_PM.AbstractPowerModel; nw::Int=pm.
 
     Phvdccaux_dup = _PM.var(pm, nw)[:Phvdccaux_dup] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_Phvdccaux_dup", lower_bound = 0, start = 0)
-    
+
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdcoaux, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdcoaux)
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdccaux, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdccaux)
     report && _IM.sol_component_value(pm, nw, :reserves, :Phvdcoaux_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), Phvdcoaux_dup)

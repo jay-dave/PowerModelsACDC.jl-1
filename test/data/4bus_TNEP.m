@@ -104,3 +104,9 @@ mpc.branchdc_ne = [
 	2	14.5 5  48   0.1   0.05   0.150  4 80 5.3;
  ];
  %the syn. area no. must start from 1 to length of reserves
+
+%column_names%  convdc br1 br2 br3 br4 br5 br6 br7 br8
+mpc.incident = [
+3 1 0 1 1 1 1 1 1;
+4 1 1 1 0 1 1 1 1;
+];
