@@ -156,7 +156,7 @@ function objective_min_cost_acdc(pm::_PM.AbstractPowerModel)
             sum(
                 sum(conv["cost"]*_PM.var(pm, n, :conv_ne, i) for (i,conv) in nw_ref[:convdc_ne])
                 +
-                sum(branch["construction_cost"]*_PM.var(pm, n, :branch_ne, i) for (i,branch) in nw_ref[:ne_branch])
+                sum(branch["construction_cost"]*_PM.var(pm, n, :branchdc_ne, i) for (i,branch) in nw_ref[:ne_branch])
                 +
                 sum(branch["cost"]*_PM.var(pm, n, :branchdc_ne, i) for (i,branch) in nw_ref[:branchdc_ne])
                 +
