@@ -60,7 +60,6 @@ for proti = 1:1
     "Permanentloss" => true, "Cont_list" => Cont_list,"base_list" => base_list,"Total_sample" =>Total_sample, "curtailed_gen" => curtailed_gen, "max_curt" => max_curt, "syncarea" => syncarea, "weights" => base_weight, "year_base" => year_base, "total_yr" => total_yr)
     end
 
-
     if period == "single"   push!(s, "multiperiod"=> false)
     elseif period == "multi"  push!(s, "multiperiod"=> true )
     end
@@ -68,9 +67,9 @@ for proti = 1:1
     @assert ( s["FSprotection"] == true && (Prot_system == "FS_HDCCB" || Prot_system == "FS_MDCCB") ) || (s["NSprotection"] == true && (Prot_system == "NS_CB" || Prot_system == "NS_FB"))|| (Prot_system == "Permanentloss" && s["NSprotection"] == false && s["FSprotection"] == false)
 
     if occursin("4bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\4bus\\",Prot_system,"pos_cl.xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\4bus\\",Prot_system,"_pos_cl.xlsx")
     elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\6bus\\",Prot_system,"pos_cl.xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\6bus\\",Prot_system,"_pos_cl.xlsx")
     end
 
     for (n,nw) in data_cont["nw"]
@@ -86,7 +85,7 @@ for proti = 1:1
 
     data_cont1 = Protectionsystemcost_4bus(deepcopy(data_cont), Prot_system, no_nw)
     resultDC1 = _PMACDC.run_mp_tnepscopf(data_cont1, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-    display_keyindictionary(resultDC1, "isbuilt", "Pgg")
+    display_keyindictionary(resultDC1, "isbuilt", "Pgg", base_list)
     built_cv, built_br = _PMACDC.display_results_tnep_mp(resultDC1)
     curtail, maxFFR = curtailment(data_cont1, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf

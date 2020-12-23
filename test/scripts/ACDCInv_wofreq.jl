@@ -26,6 +26,7 @@ cost = Any[]
 
     gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "Presolve" => -1)
 
+    include("bkgrnd_cal.jl")
     no_nw = Total_sample*total_yr
     data_mp = multi_network(file, no_nw)
     # year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
@@ -45,9 +46,9 @@ cost = Any[]
     year_base = year_base_networks(Total_sample, total_yr, base_list)
 
     if occursin("4bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\4bus\\",Prot_system,"_poscl.xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\4bus\\",Prot_system,"_wofre_poscl.xlsx")
     elseif occursin("6bus", file)
-        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\6bus\\",Prot_system,"_poscl.xlsx")
+        filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\TNEP\\6bus\\",Prot_system,"_wofre_poscl.xlsx")
     end
 
     resultDC1 = _PMACDC.run_mp_tnepscopf(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)

@@ -12,8 +12,8 @@ using JLD2
 using Statistics
 include("basencont_nw.jl")
 
-Total_sample = 50  # sample per year
-total_yr = 6# the years in horizon, data coming from excels
+Total_sample = 500  # sample per year
+total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
 Prot_system = "Permanentloss"
@@ -31,8 +31,8 @@ max_curt = 0
 
     no_nw = 2 * Total_sample*total_yr
     data_mp = multi_network(file, no_nw)
-    year = ["NAT_2025_Generation", "NAT_2030_Generation", "NAT_2035_Generation", "NAT_2040_Generation", "NAT_2045_Generation", "NAT_2050_Generation"]
-    year_num = ["2025", "2030", "2035", "2040", "2045", "2050"]
+    year = ["NAT_2025_Generation","NAT_2035_Generation", "NAT_2045_Generation"]
+    year_num = ["2025", "2035", "2045"]
     # year = ["NAT_2050_Generation"]
     yr = 1
 
@@ -86,7 +86,7 @@ max_curt = 0
         sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
         sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
         sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-        sheet["$(string("A",5))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
+        sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
         # sheet["$(string("A",5))"] = sum(curtail)
         sheet["$(string("A",6))"] = resultDC1["objective"]
         sheet["$(string("A",7))"] = maxFFR
@@ -120,18 +120,18 @@ for b in year_base[3]
      push!(FFR_reserve_hr_2035, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
      push!(FCR_reserve_hr_2035, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
 end
-for b in year_base[4]
-     push!(Inertia_2040, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
-     push!(FFR_reserve_hr_2040, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
-     push!(FCR_reserve_hr_2040, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
-end
-for b in year_base[5]
-     push!(Inertia_2045, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
-     push!(FFR_reserve_hr_2045, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
-     push!(FCR_reserve_hr_2045, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
-end
-for b in year_base[6]
-     push!(Inertia_2050, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
-     push!(FFR_reserve_hr_2050, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
-     push!(FCR_reserve_hr_2050, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
-end
+# for b in year_base[4]
+#      push!(Inertia_2040, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
+#      push!(FFR_reserve_hr_2040, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
+#      push!(FCR_reserve_hr_2040, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
+# end
+# for b in year_base[5]
+#      push!(Inertia_2045, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
+#      push!(FFR_reserve_hr_2045, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
+#      push!(FCR_reserve_hr_2045, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
+# end
+# for b in year_base[6]
+#      push!(Inertia_2050, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
+#      push!(FFR_reserve_hr_2050, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
+#      push!(FCR_reserve_hr_2050, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
+# end

@@ -339,3 +339,27 @@ end
         end
         return data_ip, cost
     end
+
+
+
+    function mp_contignecy_nocl_sensitivity(data_ip, Total_sample, br_no)
+        Cont_list = Any[]
+        base_list = Any[] #(base_nw, cont_nw, cont_br)
+        st_nw = 0
+        end_nw = 0
+        for i = 1:Total_sample
+             if i == 1
+                st_nw = 2
+                end_nw = 2
+             else
+                 st_nw = end_nw + 2
+                end_nw = end_nw + 2
+            end
+            push!(base_list, st_nw - 1)
+            for n = st_nw:end_nw
+                push!(Cont_list, (st_nw - 1, n, br_no))
+                data_ip["nw"]["$n"]["branchdc"]["$br_no"]["rateA"] = 0
+             end
+        end
+        return data_ip, Cont_list, base_list
+    end

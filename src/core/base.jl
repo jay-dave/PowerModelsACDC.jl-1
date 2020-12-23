@@ -143,7 +143,7 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
         end
 
         nw_ref[:bus_convs_dirct] =   bus_convs_dirct
-        display("bus_convs_dirct")
+        display("bus_convs_dirct:$n")
         display(bus_convs_dirct)
 
             # display("nw)ref")

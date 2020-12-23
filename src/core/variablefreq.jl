@@ -193,6 +193,8 @@ function variable_frequency_power_dev_aux(pm::_PM.AbstractPowerModel; nw::Int=pm
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k11", start = 0)
     k12 = _PM.var(pm, nw)[:k12] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k12", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k11, _PM.ids(pm, nw, :arcs_reserves_syn), k11)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k12, _PM.ids(pm, nw, :arcs_reserves_syn), k12)
 
     k21 = _PM.var(pm, nw)[:k21] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k21", start = 0)
@@ -200,6 +202,9 @@ function variable_frequency_power_dev_aux(pm::_PM.AbstractPowerModel; nw::Int=pm
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k22", start = 0)
     k23 = _PM.var(pm, nw)[:k23] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k23", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k21, _PM.ids(pm, nw, :arcs_reserves_syn), k21)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k22, _PM.ids(pm, nw, :arcs_reserves_syn), k22)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k23, _PM.ids(pm, nw, :arcs_reserves_syn), k23)
 
     k31 = _PM.var(pm, nw)[:k31] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k31", start = 0)
@@ -207,6 +212,9 @@ function variable_frequency_power_dev_aux(pm::_PM.AbstractPowerModel; nw::Int=pm
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k32", start = 0)
     k33 = _PM.var(pm, nw)[:k33] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k33", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k31, _PM.ids(pm, nw, :arcs_reserves_syn), k31)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k32, _PM.ids(pm, nw, :arcs_reserves_syn), k32)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k33, _PM.ids(pm, nw, :arcs_reserves_syn), k33)
 
     k41 = _PM.var(pm, nw)[:k41] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k41", start = 0)
@@ -214,6 +222,47 @@ function variable_frequency_power_dev_aux(pm::_PM.AbstractPowerModel; nw::Int=pm
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k42", start = 0)
     k43 = _PM.var(pm, nw)[:k43] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k43", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k41, _PM.ids(pm, nw, :arcs_reserves_syn), k41)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k42, _PM.ids(pm, nw, :arcs_reserves_syn), k42)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k43, _PM.ids(pm, nw, :arcs_reserves_syn), k43)
+
+    k11_dup = _PM.var(pm, nw)[:k11_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k11_dup", start = 0)
+    k12_dup = _PM.var(pm, nw)[:k12_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k12_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k11_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k11_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k12_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k12_dup)
+
+    k21_dup = _PM.var(pm, nw)[:k21_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k21_dup", start = 0)
+    k22_dup = _PM.var(pm, nw)[:k22_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k22_dup", start = 0)
+    k23_dup = _PM.var(pm, nw)[:k23_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k23_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k21_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k21_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k22_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k22_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k23_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k23_dup)
+
+    k31_dup = _PM.var(pm, nw)[:k31_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k31_dup", start = 0)
+    k32_dup = _PM.var(pm, nw)[:k32_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k32_dup", start = 0)
+    k33_dup = _PM.var(pm, nw)[:k33_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k33_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k31_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k31_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k32_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k32_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k33_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k33_dup)
+
+    k41_dup = _PM.var(pm, nw)[:k41_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k41_dup", start = 0)
+    k42_dup = _PM.var(pm, nw)[:k42_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k42_dup", start = 0)
+    k43_dup = _PM.var(pm, nw)[:k43_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn)], base_name="$(nw)_k43_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k41_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k41_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k42_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k42_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k43_dup, _PM.ids(pm, nw, :arcs_reserves_syn), k43_dup)
+
 end
 
 
@@ -243,6 +292,44 @@ function variable_frequency_power_dev_aux_ne(pm::_PM.AbstractPowerModel; nw::Int
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k42", start = 0)
     k43 = _PM.var(pm, nw)[:k43] = JuMP.@variable(pm.model,
     [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k43", start = 0)
+
+    k11_dup = _PM.var(pm, nw)[:k11_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k11_dup", start = 0)
+    k12_dup = _PM.var(pm, nw)[:k12_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k12_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k11_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k11_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k12_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k12_dup)
+
+    k21_dup = _PM.var(pm, nw)[:k21_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k21_dup", start = 0)
+    k22_dup = _PM.var(pm, nw)[:k22_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k22_dup", start = 0)
+    k23_dup = _PM.var(pm, nw)[:k23_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k23_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k21_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k21_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k22_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k22_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k23_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k23_dup)
+
+    k31_dup = _PM.var(pm, nw)[:k31_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k31_dup", start = 0)
+    k32_dup = _PM.var(pm, nw)[:k32_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k32_dup", start = 0)
+    k33_dup = _PM.var(pm, nw)[:k33_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k33_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k31_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k31_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k32_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k32_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k33_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k33_dup)
+
+    k41_dup = _PM.var(pm, nw)[:k41_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k41_dup", start = 0)
+    k42_dup = _PM.var(pm, nw)[:k42_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k42_dup", start = 0)
+    k43_dup = _PM.var(pm, nw)[:k43_dup] = JuMP.@variable(pm.model,
+    [i in _PM.ids(pm, nw, :arcs_reserves_syn_ne)], base_name="$(nw)_k43_dup", start = 0)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k41_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k41_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k42_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k42_dup)
+    report && _IM.sol_component_value(pm, nw, :reserves, :k43_dup, _PM.ids(pm, nw, :arcs_reserves_syn_ne), k43_dup)
+
 end
 
 function sol_component_value_mod(pm::_PM.AbstractPowerModel, n::Int, comp_name::Symbol, variables)

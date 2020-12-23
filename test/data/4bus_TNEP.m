@@ -107,6 +107,6 @@ mpc.branchdc_ne = [
 
 %column_names%  convdc br1 br2 br3 br4 br5 br6 br7 br8
 mpc.incident = [
-3 1 0 1 1 1 1 1 1;
-4 1 1 1 0 1 1 1 1;
+3 1 1 1 1 1 1 1 1;
+4 1 1 1 1 1 1 1 1;
 ];

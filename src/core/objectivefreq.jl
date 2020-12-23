@@ -252,7 +252,7 @@ function objective_min_cost_TNEP_FSNS(pm::_PM.AbstractPowerModel)
 	               JuMP.@constraint(pm.model, Curt[y] == sum(sum(curtailment[(b,c)] for c in curt_gen) for b in year_base[y]) / sum(sum(capacity[(b,c)] for c in curt_gen) for b in year_base[y])  )
 	               # JuMP.@constraint(pm.model, Curt[y] <= max_curt)
 	        end
-            return JuMP.@objective(pm.model, Min, Inv_cost + FFRReserves + FCRReserves + Gen_cost )
+            return JuMP.@objective(pm.model, Min, Inv_cost + FFRReserves + FCRReserves + Gen_cost)
 end
 
 function objective_min_cost_TNEP_PL_nocl(pm::_PM.AbstractPowerModel)

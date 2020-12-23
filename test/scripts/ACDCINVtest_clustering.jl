@@ -12,7 +12,7 @@ using JLD2
 using Statistics, FileIO
 
 include("basencont_nw.jl")
-Total_sample = 10  # samples per yearsum()
+Total_sample = 10# samples per yearsum()
 total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
 # Prot_system = "NS_CB"
@@ -87,7 +87,7 @@ for proti = 1:3
 
     data_cont1 = Protectionsystemcost_4bus(deepcopy(data_cont), Prot_system, no_nw)
     resultDC1 = _PMACDC.run_mp_tnepscopf(data_cont1, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-    display_keyindictionary(resultDC1, "isbuilt", "Pgg")
+    display_keyindictionary(resultDC1, "isbuilt", "Pgg", base_list)
     built_cv, built_br = _PMACDC.display_results_tnep_mp(resultDC1)
     # curtail, maxFFR = curtailment(data_cont1, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf
@@ -99,7 +99,7 @@ for proti = 1:3
         sheet["$(string("A",5))"] = mean(resultDC1["solution"]["nw"]["1"]["Curt"])
         # sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Cont"])
         sheet["$(string("A",6))"] = resultDC1["objective"]
-        sheet["$(string("A",7))"] = 0
+        sheet["$(string("A",7))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
         sheet["$(string("A",8))"] = 0
         sheet["$(string("A",9))"] = resultDC1["solution"]["nw"]["1"]["Inv_cost"]
         sheet["$(string("A",10))"] = built_cv

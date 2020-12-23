@@ -16,7 +16,7 @@ Total_sample = 50  # sample per year
 total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
-# Prot_system = "FS_HDCCB"
+# Prot_system = "NS_CB"
 Prot_system_coll = ["FS_HDCCB", "NS_CB", "Permanentloss"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
@@ -35,6 +35,8 @@ for proti = 1:3
     data_mp = multi_network(file, no_nw)
     year = ["NAT_2025_Generation","NAT_2035_Generation", "NAT_2045_Generation"]
     year_num = ["2025", "2035", "2045"]
+
+    # year_num = ["2025"]
     # year = ["NAT_2050_Generation"]
     yr = 1
 
@@ -80,7 +82,7 @@ for proti = 1:3
      end
 
     resultDC1 = _PMACDC.run_acdcscopf_nocl(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
-    display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
+    # display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
     # display(curtailed_gen)
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
      XLSX.openxlsx(filepath, mode="w") do xf
@@ -398,3 +400,30 @@ end
 #         end
 # end
 # end
+
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k11"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k12"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k11_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k12_dup"] )
+
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k21"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k22"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k23"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k21_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k22_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k23_dup"] )
+
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k31"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k32"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k33"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k31_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k32_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k33_dup"] )
+
+
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k41"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k42"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k43"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k41_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k42_dup"] )
+display(resultDC1["solution"]["nw"]["2"]["reserves"]["2"]["k43_dup"] )

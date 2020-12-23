@@ -80,7 +80,7 @@ mpc.branchdc = [
  %pu value of percentage of total load
  %column_names%  syncarea Pgmax Tg Pfmax Tf Td Tcl H Cf Cg
  mpc.reserves = [
-	1	48  5  48   0.1   0.05   0.150  4 5.3 80; % reserves are in MW*100 i.e. 24 = 2400MW
-	2	48  5  48   0.1   0.05   0.150  4 5.3 80;
+	1	14.5 5  48   0.1   0.05   0.150  4 80 5.3; % reserves are in MW*100 i.e. 24 = 2400MW
+	2	14.5 5  48   0.1   0.05   0.150  4 80 5.3;
  ];
  %the syn. area no. must start from 1 to length of reserves

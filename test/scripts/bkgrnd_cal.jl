@@ -22,7 +22,7 @@ end
 # end
 
 
-function display_keyindictionary(dict, key1, key2)
+function display_keyindictionary(dict, key1, key2, base_lst)
     for (n, nw) in dict["solution"]["nw"]
     if parse(Int64,n) == 1
         for (b,branch) in nw["branchdc_ne"]
@@ -34,7 +34,7 @@ function display_keyindictionary(dict, key1, key2)
     end
     end
     display("################reserves################")
-    for (n, nw) in dict["solution"]["nw"]
+    for (n, nw) in sort(dict["solution"]["nw"])
          display("Pgg:n$n $(nw["reserves"]["2"]["Pgg"])")
     end
     for (n, nw) in dict["solution"]["nw"]
@@ -61,12 +61,18 @@ function display_keyindictionary(dict, key1, key2)
         display("Phvdcdup,open:n$n $(nw["reserves"]["2"]["Phvdcoaux_dup"])")
          display("Phvdcdup,close:n$n $(nw["reserves"]["2"]["Phvdccaux_dup"])")
     end
+    display("################Power deviation_max################")
+    for b in base_lst
+        display("FFR,max:$(dict["solution"]["nw"]["$b"]["FFRReserves_max"])")
+    end
 
     display("Invcost: $(dict["solution"]["nw"]["1"]["Inv_cost"])")
     display("FCRcost: $(dict["solution"]["nw"]["1"]["FCR_Reserves"])")
     display("FFRcost: $(dict["solution"]["nw"]["1"]["FFR_Reserves"])")
     display("Gencost: $(dict["solution"]["nw"]["1"]["Gen_cost"])")
     display("Objective: $(dict["objective"])")
+    display("Zff:$(dict["solution"]["nw"]["1"]["Zff"])")
+
 end
 
 function display_keyindictionary_OPF(dict, key1, key2)
@@ -83,7 +89,7 @@ function display_keyindictionary_OPF(dict, key1, key2)
     display("z1:n$n $(nw["reserves"]["2"]["z1"]) z2: $(nw["reserves"]["2"]["z2"]) z3: $(nw["reserves"]["2"]["z3"]) z4: $(nw["reserves"]["2"]["z4"])  z5: $(nw["reserves"]["2"]["z5"])")
     end
     display("################gen################")
-    for (n, nw) in dict["solution"]["nw"]
+    for (n, nw) in sort(dict["solution"]["nw"])
     display("Pg1:n$n $(nw["gen"]["1"]["pg"])  Pg2: $(nw["gen"]["2"]["pg"])  Pg3: $(nw["gen"]["3"]["pg"]) ")
     end
     display("################branch################")
@@ -104,8 +110,10 @@ function display_keyindictionary_OPF(dict, key1, key2)
     display("$(dict["solution"]["nw"]["1"]["FCR_Reserves"])")
     display("$(dict["solution"]["nw"]["1"]["FFR_Reserves"])")
     display("$(dict["solution"]["nw"]["1"]["Gen_cost"])")
+
     # display("$(dict["solution"]["nw"]["1"]["Cont"])")
     display("$(dict["objective"])")
+
 end
 function display_keyindictionary_OPF_PLdim(dict, key1, key2)
     display("################reserves################")
