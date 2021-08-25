@@ -55,6 +55,12 @@ function display_keyindictionary(dict, key1, key2, base_lst)
         # n$n:b7: $(nw["branchdc_ne"]["7"]["pf"]) b8: $(nw["branchdc_ne"]["8"]["pf"])")
         # #display("n$n:b9: $(nw["branchdc_ne"]["9"]["pf"])  b10: $(nw["branchdc_ne"]["10"]["pf"]) b11: $(nw["branchdc_ne"]["11"]["pf"]) b12: $(nw["branchdc_ne"]["12"]["pf"]) ")
     end
+    for (n, nw) in dict["solution"]["nw"]
+    display("c1:n$n $(nw["convdc_ne"]["1"]["pconv"]) c2:$(nw["convdc_ne"]["2"]["pconv"]) c3:$(nw["convdc_ne"]["3"]["pconv"]) c4:$(nw["convdc_ne"]["4"]["pconv"])")
+        # b10: $(nw["branchdc_ne"]["10"]["pf"]) b11: $(nw["branchdc_ne"]["11"]["pf"]) b12: $(nw["branchdc_ne"]["12"]["pf"])"
+        # n$n:b7: $(nw["branchdc_ne"]["7"]["pf"]) b8: $(nw["branchdc_ne"]["8"]["pf"])")
+        # #display("n$n:b9: $(nw["branchdc_ne"]["9"]["pf"])  b10: $(nw["branchdc_ne"]["10"]["pf"]) b11: $(nw["branchdc_ne"]["11"]["pf"]) b12: $(nw["branchdc_ne"]["12"]["pf"]) ")
+    end
     display("################Power deviation################")
     display("Phvdc,open: $(dict["solution"]["nw"]["2"]["reserves"]["2"]["Phvdcoaux"])")
     for (n, nw) in dict["solution"]["nw"]
@@ -158,7 +164,7 @@ function Protectionsystemcost_4bus(data, PS, no_nw)
 
                   # nw["branchdc_ne"]["1"]["cost"] = 232.36/no_nw;
                   nw["branchdc_ne"]["1"]["cost"] = 336.58/no_nw; nw["branchdc_ne"]["2"]["cost"] = 337.36/no_nw; nw["branchdc_ne"]["3"]["cost"] = 336.58/no_nw;
-                  nw["branchdc_ne"]["4"]["cost"] = 232.36/no_nw; nw["branchdc_ne"]["5"]["cost"] = 752.14/no_nw;
+                  nw["branchdc_ne"]["4"]["cost"] = 232.36/no_nw; nw["branchdc_ne"]["5"]["cost"] = 384.14/no_nw;
                   nw["branchdc_ne"]["6"]["cost"] = 336.58/no_nw;nw["branchdc_ne"]["7"]["cost"] = 336.58/no_nw;
                   nw["branchdc_ne"]["8"]["cost"] = 384.14/no_nw;
 
@@ -191,7 +197,7 @@ function Protectionsystemcost_4bus(data, PS, no_nw)
                   # nw["branchdc_ne"]["8"]["cost"] = 1280.41*0.5/no_nw; nw["branchdc_ne"]["9"]["cost"] = 650.40*0.5/no_nw; nw["branchdc_ne"]["10"]["cost"] = 1280.41*0.5/no_nw
                   # nw["branchdc_ne"]["11"]["cost"] = 440.40*0.5/no_nw; nw["branchdc_ne"]["12"]["cost"] = 1482.2*0.54/no_nw;
                   nw["branchdc_ne"]["1"]["cost"] = 330.36/no_nw; nw["branchdc_ne"]["2"]["cost"] = 330.36/no_nw; nw["branchdc_ne"]["3"]["cost"] = 330.36/no_nw
-                  nw["branchdc_ne"]["4"]["cost"] = 225.36/no_nw; nw["branchdc_ne"]["5"]["cost"] = 745.84/no_nw;
+                  nw["branchdc_ne"]["4"]["cost"] = 225.36/no_nw; nw["branchdc_ne"]["5"]["cost"] = 378.34/no_nw;
                   nw["branchdc_ne"]["6"]["cost"] = 330.36/no_nw; nw["branchdc_ne"]["7"]["cost"] = 330.36/no_nw
                   nw["branchdc_ne"]["8"]["cost"] = 378.34/no_nw;
 
@@ -213,7 +219,7 @@ function Protectionsystemcost_4bus(data, PS, no_nw)
                # nw["convdc_ne"]["5"]["cost"] = 176.91/no_nw; nw["convdc_ne"]["6"]["cost"] = 176.91/no_nw; nw["convdc_ne"]["7"]["cost"] = 229.98/no_nw; nw["convdc_ne"]["8"]["cost"] = 229.98/no_nw
 
                nw["branchdc_ne"]["1"]["cost"] = 315/no_nw; nw["branchdc_ne"]["2"]["cost"] = 315/no_nw; nw["branchdc_ne"]["3"]["cost"] = 315/no_nw
-               nw["branchdc_ne"]["4"]["cost"] = 210/no_nw; nw["branchdc_ne"]["5"]["cost"] = 735/no_nw;
+               nw["branchdc_ne"]["4"]["cost"] = 210/no_nw; nw["branchdc_ne"]["5"]["cost"] = 367.5/no_nw;
                nw["branchdc_ne"]["6"]["cost"] = 315/no_nw; nw["branchdc_ne"]["7"]["cost"] = 315/no_nw;
                nw["branchdc_ne"]["8"]["cost"] = 367.5/no_nw;
         end
