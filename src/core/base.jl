@@ -148,7 +148,6 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
 
             # display("nw)ref")
             # display(nw_ref)
-            # display(nw_ref)
             if haskey(nw_ref, :reserves)
             # display("Multinetwork:reserves")
 
@@ -204,8 +203,8 @@ function add_ref_dcgrid!(ref::Dict{Symbol,<:Any}, data::Dict{String,<:Any})
                 push!(arcs_reserves_syn[reserve["syncarea"]], i)
             end
             nw_ref[:arcs_reserves_syn] = arcs_reserves_syn
-            display("arcs_reserves_syn")
-            display(arcs_reserves_syn)
+            # display("arcs_reserves_syn")
+            # display(arcs_reserves_syn)
 
             bus_syc_arc = Dict([(i, []) for (i,bus) in nw_ref[:bus]])
             for (i,conv) in nw_ref[:convdc]

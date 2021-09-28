@@ -11,18 +11,17 @@ using XLSX
 using JLD2
 using Statistics, FileIO
 include("basencont_nw.jl")
-Total_sample = 15  # sample per year
+Total_sample = 50  # sample per year
 total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
 
-Prot_system_coll = ["FS_HDCCB"]
-# Prot_system_coll = ["Permanentloss", "FS_HDCCB", "NS_CB"]
+# Prot_system_coll = ["FS_HDCCB"]
+Prot_system_coll = ["Permanentloss", "FS_HDCCB", "NS_CB"]
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
 max_curt = 0
 
-# for proti = 1:3
-proti = 1
+for proti = 1:3
     Prot_system = Prot_system_coll[proti]
     file = "./test/data/4bus_OPF.m"
     data_sp = _PM.parse_file(file)
@@ -84,21 +83,21 @@ proti = 1
     # display_keyindictionary_OPF(resultDC1, "isbuilt", "Pgg")
     # display(curtailed_gen)
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
-     # XLSX.openxlsx(filepath, mode="w") do xf
-     #    sheet = xf[1]
-        # sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-        # sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-        # sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-        # sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-        # sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
-        # sheet["$(string("A",6))"] = resultDC1["objective"]
-        # sheet["$(string("A",7))"] = maxFFR
-        # sheet["$(string("A",8))"] = maxFCR
-        # sheet["$(string("A",9))"] = resultDC1["objective_lb"]
-        # sheet["$(string("A",10))"] = meanFFR
-        # sheet["$(string("A",11))"] = meanFCR
-    # end
-# end
+     XLSX.openxlsx(filepath, mode="w") do xf
+        sheet = xf[1]
+        sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
+        sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+        sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+        sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+        sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
+        sheet["$(string("A",6))"] = resultDC1["objective"]
+        sheet["$(string("A",7))"] = maxFFR
+        sheet["$(string("A",8))"] = maxFCR
+        sheet["$(string("A",9))"] = resultDC1["objective_lb"]
+        sheet["$(string("A",10))"] = meanFFR
+        sheet["$(string("A",11))"] = meanFCR
+    end
+end
 ######################start inertia############################
 # inertia = 1:0.1:1.3
 # column = ["A" "B" "C" "D" "E" "F" "G" "H"]

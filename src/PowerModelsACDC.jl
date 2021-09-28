@@ -36,7 +36,6 @@ include("prob/mp_acdctnepopf.jl")
 include("prob/mp_tnepopf_bf.jl")
 include("prob/mp_acdctnepopf_bf.jl")
 include("prob/tnepscopf.jl")
-include("prob/tnepopf_EU.jl")
 
 
 include("core/solution.jl")

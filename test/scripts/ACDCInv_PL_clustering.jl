@@ -12,7 +12,7 @@ using JLD2
 using Statistics, FileIO
 
 include("basencont_nw.jl")
-Total_sample = 25  # samples per year
+Total_sample = 10  # samples per year
 total_yr = 3  # the years in horizon, data coming from excels
 period = "multi" # single or multi
 # Prot_system = "Permanentloss"
@@ -91,10 +91,10 @@ for proti = 1:1
      XLSX.openxlsx(filepath, mode="w") do xf
          sheet = xf[1]
          sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-         sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_p1"] + resultDC1["solution"]["nw"]["1"]["FFR_p2"] + resultDC1["solution"]["nw"]["1"]["FFR_p3"]
-         sheet["$(string("A",3))"] =  resultDC1["solution"]["nw"]["1"]["FCR_p1"] + resultDC1["solution"]["nw"]["1"]["FCR_p2"] + resultDC1["solution"]["nw"]["1"]["FCR_p3"]
-         sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost_p1"] + resultDC1["solution"]["nw"]["1"]["Gen_cost_p2"] + resultDC1["solution"]["nw"]["1"]["Gen_cost_p3"]
-         sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
+         sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+         sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+         sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+         sheet["$(string("A",5))"] = mean(resultDC1["solution"]["nw"]["1"]["Curt"])
          # sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Cont"])
          sheet["$(string("A",6))"] = resultDC1["objective"]
          sheet["$(string("A",7))"] = 0

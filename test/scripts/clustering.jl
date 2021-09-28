@@ -2,7 +2,7 @@ using ParallelKMeans, RDatasets, Plots
 using Statistics, MAT, Clustering, JLD2
 using FileIO
 using Distances, Clustering, Statistics
-k = 25
+k = 10
 
 function clustering_yearwise(whichyear, k)
 # whichyear = "2035"

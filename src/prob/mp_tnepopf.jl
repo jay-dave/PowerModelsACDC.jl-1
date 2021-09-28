@@ -11,7 +11,6 @@ function run_mp_tnepopf(data::Dict{String,Any}, model_type::Type, solver; ref_ex
     if setting["process_data_internally"] == true
         # PowerModelsACDC.process_additional_data!(data)
         process_additional_data!(data)
-
     end
     s = setting
     return _PM.run_model(data, model_type, solver, post_mp_tnepopf; ref_extensions = [add_ref_dcgrid!, add_candidate_dcgrid!], setting = s, kwargs...)
@@ -25,7 +24,6 @@ function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
     #     PowerModelsACDC.add_ref_dcgrid!(pm, n)
     #     add_candidate_dcgrid!(pm, n)
     # end
-
     for (n, networks) in pm.ref[:nw]
         _PM.variable_bus_voltage(pm; nw = n)
         _PM.variable_gen_power(pm; nw = n)
@@ -55,10 +53,10 @@ function post_mp_tnepopf(pm::_PM.AbstractPowerModel)
         for i in _PM.ids(pm, n, :bus)
             constraint_power_balance_ac_dcne(pm, i; nw = n)
         end
-         for i in _PM.ids(pm, n, :branch)
 
-            _PM.constraint_ohms_yt_from_EU(pm, i; nw = n)
-            _PM.constraint_ohms_yt_to_EU(pm, i; nw = n)
+        for i in _PM.ids(pm, n, :branch)
+            _PM.constraint_ohms_yt_from(pm, i; nw = n)
+            _PM.constraint_ohms_yt_to(pm, i; nw = n)
             _PM.constraint_voltage_angle_difference(pm, i; nw = n)
             _PM.constraint_thermal_limit_from(pm, i; nw = n)
             _PM.constraint_thermal_limit_to(pm, i; nw = n)
