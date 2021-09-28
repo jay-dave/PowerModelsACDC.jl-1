@@ -15,7 +15,7 @@ include("basencont_nw.jl")
 Total_sample = 1  # sample per year
 total_yr = 1# the years in horizon, data coming from excels
 
-Prot_system = "Permanentloss"
+Prot_system = "FS_HDCCB"
 # Prot_system_coll = ["FS_HDCCB", "NS_CB", "Permanentloss"]
 curtailed_gen = [1] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
@@ -40,7 +40,7 @@ gurobi = JuMP.optimizer_with_attributes(Gurobi.Optimizer, "Presolve" => -1)
     conv_rate = Int(data_cont["nw"]["1"]["convdc"]["1"]["Pacmax"]*100)
     Clearingtime = [0.15 0.3 0.45 0.6]
     column = ["A" "B" "C" "D" "E" "F" "G" "H"]
-    filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\sensitivity\\",conv_rate,"_",Prot_system,".xlsx")
+    filepath = string("C:\\Users\\djaykuma\\OneDrive - Energyville\\Freq_TNEP_paper\\MATLAB\\plots\\OPF\\4bus\\sensitivity\\1.0\\",conv_rate,"_",Prot_system,".xlsx")
     XLSX.openxlsx(filepath, mode="w") do xf
         for i = 1:length(Clearingtime)
             for (n,nw) in data_cont["nw"]

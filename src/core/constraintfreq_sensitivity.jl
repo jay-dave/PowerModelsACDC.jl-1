@@ -118,13 +118,13 @@ function constraint_frequency_stab_OPF_MP_FSNS_sensitivity(pm::_PM.AbstractPower
             # display("FSprotection")
             Mmax = 72/ load["pd"]
             display(JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_convs_dirct, i)) / load["pd"]) )
-            display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - 0.5*sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_convs_dirct, i)) /load["pd"]) )
+            display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_convs_dirct, i)) /load["pd"]) )
             # display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"] + sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"] ) )
          elseif pm.setting["NSprotection"] == true
             # display("NSprotection")
             # display(load["pd"])
             display(JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) /load["pd"]))
-            display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - 0.5*sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"]))
+            display(JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"]))
         end
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])

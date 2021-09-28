@@ -96,7 +96,6 @@ function constraint_frequency_stab_OPF_MP_PL(pm::_PM.AbstractPowerModel)
      end
 end
 
-
 function constraint_frequency_stab_OPF_MP_FSNS(pm::_PM.AbstractPowerModel)
     base_nws = pm.setting["base_list"]
     cont_nws = pm.setting["Cont_list"]
@@ -385,8 +384,7 @@ function constraint_frequency_stab_TNEP_MP_PL(pm::_PM.AbstractPowerModel)
 
        JuMP.@constraint(pm.model, z1 + z4 == 1)
         end
-    end
-
+end
 
 function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
     base_nws = pm.setting["base_list"]
@@ -517,28 +515,28 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
            JuMP.@constraint(pm.model,[k21_dup/sqrt(2), k22_dup/sqrt(2), k23_dup, 0] in JuMP.RotatedSecondOrderCone() )
 
            ############## frequency minimum in interval 3 ##########################################
-         JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  +e  <=   Pf + (Pg/Tg)*(Tcl+Td) +  Phvdccaux_dup[i]  + M*(1-z31))
-         JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  >= Pf + (Pg/Tg)*(Tcl+Td) +  Phvdccaux_dup[i]  - M*(z31))
-         JuMP.@constraint(pm.model, Pf + (Pg/Tg)*Tcl <=   Phvdcoaux_dup[i]  + M*(1-z32))
-         JuMP.@constraint(pm.model,  Pf + (Pg/Tg)*Tcl  >= e+  Phvdcoaux_dup[i]  - M*(z32))
-         JuMP.@constraint(pm.model,  0 <= z31 + z32 - 2*z3)
-         JuMP.@constraint(pm.model,  z31 + z32 - 2*z3 <= 1)
-
-         k31 = _PM.var(pm, nw, :k31, i)
-         k32 = _PM.var(pm, nw, :k32, i)
-         k33 = _PM.var(pm, nw, :k33, i)
-         k31_dup = _PM.var(pm, nw, :k31_dup, i)
-         k32_dup = _PM.var(pm, nw, :k32_dup, i)
-         k33_dup = _PM.var(pm, nw, :k33_dup, i)
-         variable_on_off_switch(pm, k31, k31_dup, M, z3)
-         variable_on_off_switch(pm, k32, k32_dup, M, z3)
-         variable_on_off_switch(pm, k33, k33_dup, M, z3)
-
-         JuMP.@constraint(pm.model, k31 ==  (H/50 - Pf*Tf/4 + Phvdccaux_dup[i]*Tcl^2/(Td*4) ) )
-         JuMP.@constraint(pm.model, k32 ==  (Pg/Tg + Phvdccaux_dup[i]/Td) )
-         JuMP.@constraint(pm.model, k33 ==  (Phvdcoaux_dup[i] - Pf + Phvdccaux_dup[i]*Tcl/Td)/2 )
-
-         JuMP.@constraint(pm.model,[k31_dup/sqrt(2), k32_dup/sqrt(2), k33_dup, 0] in JuMP.RotatedSecondOrderCone() )
+         # JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  +e  <=   Pf + (Pg/Tg)*(Tcl+Td) +  Phvdccaux_dup[i]  + M*(1-z31))
+         # JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  >= Pf + (Pg/Tg)*(Tcl+Td) +  Phvdccaux_dup[i]  - M*(z31))
+         # JuMP.@constraint(pm.model, Pf + (Pg/Tg)*Tcl <=   Phvdcoaux_dup[i]  + M*(1-z32))
+         # JuMP.@constraint(pm.model,  Pf + (Pg/Tg)*Tcl  >= e+  Phvdcoaux_dup[i]  - M*(z32))
+         # JuMP.@constraint(pm.model,  0 <= z31 + z32 - 2*z3)
+         # JuMP.@constraint(pm.model,  z31 + z32 - 2*z3 <= 1)
+         #
+         # k31 = _PM.var(pm, nw, :k31, i)
+         # k32 = _PM.var(pm, nw, :k32, i)
+         # k33 = _PM.var(pm, nw, :k33, i)
+         # k31_dup = _PM.var(pm, nw, :k31_dup, i)
+         # k32_dup = _PM.var(pm, nw, :k32_dup, i)
+         # k33_dup = _PM.var(pm, nw, :k33_dup, i)
+         # variable_on_off_switch(pm, k31, k31_dup, M, z3)
+         # variable_on_off_switch(pm, k32, k32_dup, M, z3)
+         # variable_on_off_switch(pm, k33, k33_dup, M, z3)
+         #
+         # JuMP.@constraint(pm.model, k31 ==  (H/50 - Pf*Tf/4 + Phvdccaux_dup[i]*Tcl^2/(Td*4) ) )
+         # JuMP.@constraint(pm.model, k32 ==  (Pg/Tg + Phvdccaux_dup[i]/Td) )
+         # JuMP.@constraint(pm.model, k33 ==  (Phvdcoaux_dup[i] - Pf + Phvdccaux_dup[i]*Tcl/Td)/2 )
+         #
+         # JuMP.@constraint(pm.model,[k31_dup/sqrt(2), k32_dup/sqrt(2), k33_dup, 0] in JuMP.RotatedSecondOrderCone() )
 
          ############## frequency minimum in interval 4 ##########################################
            JuMP.@constraint(pm.model,  Phvdcoaux_dup[i]  + e <=   Pf + Pg +  Phvdccaux_dup[i]  + M*(1-z41))
@@ -563,11 +561,10 @@ function constraint_frequency_stab_TNEP_MP_FSNS(pm::_PM.AbstractPowerModel)
            JuMP.@constraint(pm.model, k43 ==  (Phvdcoaux_dup[i] - Pf - Phvdccaux_dup[i])/2 )
            JuMP.@constraint(pm.model,[k41_dup/sqrt(2), k42_dup/sqrt(2), k43_dup, 0] in JuMP.RotatedSecondOrderCone() )
 
-        JuMP.@constraint(pm.model, z1 +z2 + z3+ z4 == 1)
+        JuMP.@constraint(pm.model, z1 +z2 + z4 == 1)
 
     end
 end
-
 
 function constraint_frequency_stab_OPF_MP_PLdim(pm::_PM.AbstractPowerModel)
     base_nws = pm.setting["base_list"]
@@ -589,8 +586,8 @@ function constraint_frequency_stab_OPF_MP_PLdim(pm::_PM.AbstractPowerModel)
         JuMP.@constraint(pm.model,  Phvdcoaux[i]  == - sum(Pconv1[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == - sum(Pconv2[a] for a in _PM.ref(pm, nw, :bus_arcs_conv, i)) / load["pd"])
         JuMP.@constraint(pm.model,  Phvdccaux[i]  == 0)
-        JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
-        JuMP.@constraint(pm.model,  Pconv1[3]== Pconv1[4])
+        # JuMP.@constraint(pm.model,  Pconv1[3] - Pconv2[3] == Pconv1[4] - Pconv2[4] )
+        # JuMP.@constraint(pm.model,  Pconv1[3]== Pconv1[4])
 
         JuMP.set_upper_bound(Phvdcoaux[i], 72/load["pd"])
         JuMP.set_upper_bound(Phvdccaux[i], 72/load["pd"])

@@ -215,12 +215,40 @@ function objective_min_cost_TNEP_FSNS(pm::_PM.AbstractPowerModel)
             #   end
             # display(gen_cost)
 
+			Gen_cost_p1 = _PM.var(pm)[:Gen_cost1] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			Gen_cost_p2 = _PM.var(pm)[:Gen_cost2] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			Gen_cost_p3 = _PM.var(pm)[:Gen_cost3] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			FCR_p1 = _PM.var(pm)[:FCRReserves1] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			FCR_p2 = _PM.var(pm)[:FCRReserves2] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			FCR_p3 = _PM.var(pm)[:FCRReserves3] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			FFR_p1 = _PM.var(pm)[:FFRReserves1] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			FFR_p2 = _PM.var(pm)[:FFRReserves2] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			FFR_p3 = _PM.var(pm)[:FFRReserves3] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+			sol_component_value_mod_wonw(pm,   :Gen_cost_p1, Gen_cost_p1)
+			sol_component_value_mod_wonw(pm,   :Gen_cost_p2, Gen_cost_p2)
+			sol_component_value_mod_wonw(pm,   :Gen_cost_p3, Gen_cost_p3)
+			sol_component_value_mod_wonw(pm,   :FCR_p1, FCR_p1)
+			sol_component_value_mod_wonw(pm,   :FCR_p2, FCR_p2)
+			sol_component_value_mod_wonw(pm,   :FCR_p3, FCR_p3)
+			sol_component_value_mod_wonw(pm,   :FFR_p1, FFR_p1)
+			sol_component_value_mod_wonw(pm,   :FFR_p2, FFR_p2)
+			sol_component_value_mod_wonw(pm,   :FFR_p3, FFR_p3)
+
+
             JuMP.@constraint(pm.model, Inv_cost == sum(sum(conv["cost"]*_PM.var(pm, 1, :conv_ne, i) for (i,conv) in _PM.nws(pm)[1][:convdc_ne]) for (n, nw_ref) in _PM.nws(pm)) +
                        sum(sum(branch["cost"]*_PM.var(pm, 1, :branchdc_ne, i) for (i,branch) in _PM.nws(pm)[1][:branchdc_ne]) for (n, nw_ref) in _PM.nws(pm)) )
-			JuMP.@constraint(pm.model, Gen_cost == sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) )
+			JuMP.@constraint(pm.model, Gen_cost_p1 == sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws[1:25]) )
+			JuMP.@constraint(pm.model, Gen_cost_p2 == 1/(1+0.05)^10*sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws[26:50]) )
+			JuMP.@constraint(pm.model, Gen_cost_p3 == 1/(1+0.05)^20*sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws[51:75]) )
+
 			# display(JuMP.@constraint(pm.model, FFRReserves == sum(FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) ))
-            JuMP.@constraint(pm.model, FFRReserves == Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws) )
-            JuMP.@constraint(pm.model, FCRReserves == Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws) )
+            JuMP.@constraint(pm.model, FFR_p1 == Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws[1:25]) )
+			JuMP.@constraint(pm.model, FFR_p2 == 1/(1+0.05)^10*Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws[26:50]) )
+			JuMP.@constraint(pm.model, FFR_p3 == 1/(1+0.05)^20*Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws[51:75]) )
+
+            JuMP.@constraint(pm.model, FCR_p1 == Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws[1:25]) )
+			JuMP.@constraint(pm.model, FCR_p2 == 1/(1+0.05)^10*Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws[26:50]) )
+			JuMP.@constraint(pm.model, FCR_p3 == 1/(1+0.05)^20*Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws[51:75]) )
 
 			# display(JuMP.@constraint(pm.model, FCRReserves ==  sum(FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) ) )
 			# print(JuMP.@constraint(pm.model, Cont == sum( sum( (Scale/10^6) *gen_cost[(c,i)]*_PM.ref(pm, b, :branchdc_ne, br)["fail_prob"]*_PM.var(pm, 1, :branchdc_ne, br)
@@ -252,7 +280,7 @@ function objective_min_cost_TNEP_FSNS(pm::_PM.AbstractPowerModel)
 	               JuMP.@constraint(pm.model, Curt[y] == sum(sum(curtailment[(b,c)] for c in curt_gen) for b in year_base[y]) / sum(sum(capacity[(b,c)] for c in curt_gen) for b in year_base[y])  )
 	               # JuMP.@constraint(pm.model, Curt[y] <= max_curt)
 	        end
-            return JuMP.@objective(pm.model, Min, Inv_cost + FFRReserves + FCRReserves + Gen_cost)
+            return JuMP.@objective(pm.model, Min, Inv_cost + Gen_cost_p1 + Gen_cost_p2 + Gen_cost_p3 + FFR_p1 + FFR_p2 + FFR_p3 + FCR_p1 + FCR_p2 + FCR_p3)
 end
 
 function objective_min_cost_TNEP_PL_nocl(pm::_PM.AbstractPowerModel)
@@ -412,55 +440,74 @@ function objective_min_cost_TNEP_PL(pm::_PM.AbstractPowerModel)
         end
 
         Scale = 8760*10  # 5 for no. of gap years between two time steps
+        Gen_cost_p1 = _PM.var(pm)[:Gen_cost1] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        Gen_cost_p2 = _PM.var(pm)[:Gen_cost2] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        Gen_cost_p3 = _PM.var(pm)[:Gen_cost3] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FCR_p1 = _PM.var(pm)[:FCRReserves1] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FCR_p2 = _PM.var(pm)[:FCRReserves2] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FCR_p3 = _PM.var(pm)[:FCRReserves3] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FFR_p1 = _PM.var(pm)[:FFRReserves1] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FFR_p2 = _PM.var(pm)[:FFRReserves2] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        FFR_p3 = _PM.var(pm)[:FFRReserves3] = JuMP.@variable(pm.model, start = 0, lower_bound = 0)
+        sol_component_value_mod_wonw(pm,   :Gen_cost_p1, Gen_cost_p1)
+        sol_component_value_mod_wonw(pm,   :Gen_cost_p2, Gen_cost_p2)
+        sol_component_value_mod_wonw(pm,   :Gen_cost_p3, Gen_cost_p3)
+        sol_component_value_mod_wonw(pm,   :FCR_p1, FCR_p1)
+        sol_component_value_mod_wonw(pm,   :FCR_p2, FCR_p2)
+        sol_component_value_mod_wonw(pm,   :FCR_p3, FCR_p3)
+        sol_component_value_mod_wonw(pm,   :FFR_p1, FFR_p1)
+        sol_component_value_mod_wonw(pm,   :FFR_p2, FFR_p2)
+        sol_component_value_mod_wonw(pm,   :FFR_p3, FFR_p3)
 
-            # for (i,branch) in _PM.nws(pm)[1][:branchdc_ne]
-            #     display(branch["cost"])
-            #  end
-            #
-            #  for (i,conv) in _PM.nws(pm)[1][:convdc_ne]
-            #      display(conv["cost"])
-            #   end
-            # display(gen_cost)
 
-            JuMP.@constraint(pm.model, Inv_cost == sum(sum(conv["cost"]*_PM.var(pm, 1, :conv_ne, i) for (i,conv) in _PM.nws(pm)[1][:convdc_ne]) for (n, nw_ref) in _PM.nws(pm)) +
-                       sum(sum(branch["cost"]*_PM.var(pm, 1, :branchdc_ne, i) for (i,branch) in _PM.nws(pm)[1][:branchdc_ne]) for (n, nw_ref) in _PM.nws(pm)) )
-			JuMP.@constraint(pm.model, Gen_cost == sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws) )
-			# display(JuMP.@constraint(pm.model, FFRReserves == sum(FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) ))
-            JuMP.@constraint(pm.model, FFRReserves == Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws) )
-            JuMP.@constraint(pm.model, FCRReserves == Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws) )
+        JuMP.@constraint(pm.model, Inv_cost == sum(sum(conv["cost"]*_PM.var(pm, 1, :conv_ne, i) for (i,conv) in _PM.nws(pm)[1][:convdc_ne]) for (n, nw_ref) in _PM.nws(pm)) +
+                   sum(sum(branch["cost"]*_PM.var(pm, 1, :branchdc_ne, i) for (i,branch) in _PM.nws(pm)[1][:branchdc_ne]) for (n, nw_ref) in _PM.nws(pm)) )
+        JuMP.@constraint(pm.model, Gen_cost_p1 == sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws[1:25]) )
+        JuMP.@constraint(pm.model, Gen_cost_p2 == 1/(1+0.05)^10*sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws[26:50]) )
+        JuMP.@constraint(pm.model, Gen_cost_p3 == 1/(1+0.05)^20*sum(weights[b]*sum(Scale/10^6*gen_cost[(b,i)] for (i,gen) in _PM.nws(pm)[b][:gen]) for b in base_nws[51:75]) )
 
-			# display(JuMP.@constraint(pm.model, FCRReserves ==  sum(FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) ) )
-			# print(JuMP.@constraint(pm.model, Cont == sum( sum( (Scale/10^6) *gen_cost[(c,i)]*_PM.ref(pm, b, :branchdc_ne, br)["fail_prob"]*_PM.var(pm, 1, :branchdc_ne, br)
-            #         for i in  curt_gen)
-            #         for (b,c,br) in cont_nws) ) )
+        # display(JuMP.@constraint(pm.model, FFRReserves == sum(FFR_cost[(c,2)]*100*Scale/10^6* _PM.var(pm, c, :Pff, 2) for (b,c,br) in cont_nws) ))
+        JuMP.@constraint(pm.model, FFR_p1 == Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws[1:25]) )
+        JuMP.@constraint(pm.model, FFR_p2 == 1/(1+0.05)^10*Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws[26:50]) )
+        JuMP.@constraint(pm.model, FFR_p3 == 1/(1+0.05)^20*Scale*sum(weights[b]*FFRReserves_max[b] for b in base_nws[51:75]) )
 
-            # display(JuMP.@constraint(pm.model, Cont == sum(weights[b]*_PM.ref(pm, b, :branchdc_ne, br)["fail_prob"]*_PM.var(pm, b, :branchdc_ne, br)*
-            # (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) ) )``
- 			curtailment = Dict()
-			capacity = Dict()
-			#
-			#  for b in base_nws
-			# 	  for c in curt_gen
-			# 		curtailment[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c)) - _PM.var(pm, b, :pg, c)
-            #         # curtailment[(b,c)] = _PM.var(pm, b, :pg, c)
-			# 		capacity[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c))
-			# 	 end
-			#  end
-			 curtailment = Dict()
-	         capacity = Dict()
+        JuMP.@constraint(pm.model, FCR_p1 == Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws[1:25]) )
+        JuMP.@constraint(pm.model, FCR_p2 == 1/(1+0.05)^10*Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws[26:50]) )
+        JuMP.@constraint(pm.model, FCR_p3 == 1/(1+0.05)^20*Scale*sum(weights[b]*FCRReserves_max[b] for b in base_nws[51:75]) )
 
-	         for b in base_nws
-	             for c in curt_gen
-	               curtailment[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c)) - _PM.var(pm, b, :pg, c)
-	               capacity[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c))
-	            end
-	        end
-	        for y = 1:total_year
-	               JuMP.@constraint(pm.model, Curt[y] == sum(sum(curtailment[(b,c)] for c in curt_gen) for b in year_base[y]) / sum(sum(capacity[(b,c)] for c in curt_gen) for b in year_base[y])  )
-	               # JuMP.@constraint(pm.model, Curt[y] <= max_curt)
-	        end
+        # display(JuMP.@constraint(pm.model, FCRReserves ==  sum(FCR_cost[(c,2)]*100*Scale/10^6*_PM.var(pm, c, :Pgg, 2)  for (b,c,br) in cont_nws) ) )
+        # print(JuMP.@constraint(pm.model, Cont == sum( sum( (Scale/10^6) *gen_cost[(c,i)]*_PM.ref(pm, b, :branchdc_ne, br)["fail_prob"]*_PM.var(pm, 1, :branchdc_ne, br)
+        #         for i in  curt_gen)
+        #         for (b,c,br) in cont_nws) ) )
 
-	return display( JuMP.@objective(pm.model, Min, Inv_cost + Gen_cost + FFRReserves + FCRReserves) )
+        # display(JuMP.@constraint(pm.model, Cont == sum(weights[b]*_PM.ref(pm, b, :branchdc_ne, br)["fail_prob"]*_PM.var(pm, b, :branchdc_ne, br)*
+        # (Scale/10^6*gen_cost[(c,3)] - Scale/10^6*gen_cost[(b,3)]) for (b,c,br) in cont_nws) ) )
+        curtailment = Dict()
+        capacity = Dict()
+        #
+        #  for b in base_nws
+        # 	  for c in curt_gen
+        # 		curtailment[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c)) - _PM.var(pm, b, :pg, c)
+        #         # curtailment[(b,c)] = _PM.var(pm, b, :pg, c)
+        # 		capacity[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c))
+        # 	 end
+        #  end
+         curtailment = Dict()
+         capacity = Dict()
+
+         for b in base_nws
+             for c in curt_gen
+               curtailment[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c)) - _PM.var(pm, b, :pg, c)
+               capacity[(b,c)] = JuMP.upper_bound(_PM.var(pm, b, :pg, c))
+            end
+        end
+        for y = 1:total_year
+               JuMP.@constraint(pm.model, Curt[y] == sum(sum(curtailment[(b,c)] for c in curt_gen) for b in year_base[y]) / sum(sum(capacity[(b,c)] for c in curt_gen) for b in year_base[y])  )
+               # JuMP.@constraint(pm.model, Curt[y] <= max_curt)
+        end
+
+        return JuMP.@objective(pm.model, Min, Inv_cost + Gen_cost_p1 + Gen_cost_p2 + Gen_cost_p3 + FFR_p1 + FFR_p2 + FFR_p3 + FCR_p1 + FCR_p2 + FCR_p3 )
+
 end
 
 

@@ -121,17 +121,15 @@ function objective_min_cost(pm::_PM.AbstractPowerModel)
                 end
             end
         end
-
         return JuMP.@objective(pm.model, Min,
-            sum(
+                sum(
                 sum(conv["cost"]*_PM.var(pm, n, :conv_ne, i) for (i,conv) in nw_ref[:convdc_ne])
                 +
                 sum(branch["cost"]*_PM.var(pm, n, :branchdc_ne, i) for (i,branch) in nw_ref[:branchdc_ne])
                 +
-                sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen] )
+                30*8760/300*sum( gen_cost[(n,i)] for (i,gen) in nw_ref[:gen] )
                 for (n, nw_ref) in _PM.nws(pm)
-                    )
-        )
+        ))
 end
 
 function objective_min_cost_acdc(pm::_PM.AbstractPowerModel)

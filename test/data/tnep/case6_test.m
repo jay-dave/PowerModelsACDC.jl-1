@@ -80,3 +80,25 @@ mpc.convdc_ne = [
 5       5   1       1       -360    -1.66   		0 1.0        0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     15     1      1.1033 0.887  2.885    2.885       0.0050    -52.7   1.0079   0 700 -700 700 -700 4.5;
 6       6   2       1       -360    -1.66   		0 1.0        0.01  0.01 1 1 0.01 1 0.01   0.01 1  345         1.1     0.9     15     1      1.1033 0.887  2.885    2.885       0.0050    -52.7   1.0079   0 700 -700 700 -700 5;
 ];
+
+
+ %% reserve data
+ %pu value of percentage of total load
+ %column_names%  syncarea Pgmax Tg Pfmax Tf Td Tcl H Cf Cg
+ mpc.reserves = [
+	1	40  15  40  0.1   0.05   0.150  1 5 5; % reserves are in MW*100 i.e. 24 = 2300MW
+	2	40  15  40  0.1   0.05   0.150  1 5 5;
+	3	40  15  40  0.1   0.05   0.150  1 5 5;
+ ];
+ %the syn. area no. must start from 1 to length of reserves
+
+%column_names%  convdc br1 br2 br3 br4 br5 br6 br7 br8 br9 br10
+ mpc.incident = [
+ 8  1 1 1 1 1 1 1 1 1 1;
+ 9  1 1 1 1 1 1 1 1 1 1;
+ 10 1 1 1 1 1 1 1 1 1 1;
+ 11 1 1 1 1 1 1 1 1 1 1;
+ 12 1 1 1 1 1 1 1 1 1 1;
+ 13 1 1 1 1 1 1 1 1 1 1;
+ 14 1 1 1 1 1 1 1 1 1 1;
+ ];

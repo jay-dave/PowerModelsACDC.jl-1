@@ -78,48 +78,48 @@ max_curt = 0
 
     resultDC1 = _PMACDC.run_acdcscopf_nocl_PLdim(data_cont, _PM.DCPPowerModel, gurobi, multinetwork = true;  setting = s)
     display_keyindictionary_OPF_PLdim(resultDC1, "isbuilt", "Pgg")
-    # display(curtailed_gen)
+    # display(curtailed_gen
     curtail, maxFFR, maxFCR, meanFFR, meanFCR = curtailment(data_cont, base_list, resultDC1, curtailed_gen)
-     XLSX.openxlsx(filepath, mode="w") do xf
-        sheet = xf[1]
-        sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-        sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-        sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-        sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-        sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
-        # sheet["$(string("A",5))"] = sum(curtail)
-        sheet["$(string("A",6))"] = resultDC1["objective"]
-        sheet["$(string("A",7))"] = maxFFR
-        sheet["$(string("A",8))"] = maxFCR
-        sheet["$(string("A",9))"] = resultDC1["objective_lb"]
-        sheet["$(string("A",10))"] = meanFFR
-        sheet["$(string("A",11))"] = meanFCR
-    end
+    #  XLSX.openxlsx(filepath, mode="w") do xf
+    #     sheet = xf[1]
+    #     sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
+    #     sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
+    #     sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
+    #     sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
+    #     sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
+    #     # sheet["$(string("A",5))"] = sum(curtail)
+    #     sheet["$(string("A",6))"] = resultDC1["objective"]
+    #     sheet["$(string("A",7))"] = maxFFR
+    #     sheet["$(string("A",8))"] = maxFCR
+    #     sheet["$(string("A",9))"] = resultDC1["objective_lb"]
+    #     sheet["$(string("A",10))"] = meanFFR
+    #     sheet["$(string("A",11))"] = meanFCR
+    # end
 
 
-FCR_reserve_hr_2025 = Any[]; FCR_reserve_hr_2030 = Any[]; FCR_reserve_hr_2035 = Any[]; FCR_reserve_hr_2040 = Any[]; FCR_reserve_hr_2045 = Any[]; FCR_reserve_hr_2050 = Any[]
-FFR_reserve_hr_2025 = Any[]; FFR_reserve_hr_2030 = Any[]; FFR_reserve_hr_2035 = Any[]; FFR_reserve_hr_2040 = Any[]; FFR_reserve_hr_2045 = Any[]; FFR_reserve_hr_2050 = Any[]
-Inertia_2025 = Any[]; Inertia_2030 = Any[]; Inertia_2035 = Any[]; Inertia_2040 = Any[]; Inertia_2045 = Any[]; Inertia_2050 = Any[]
+# FCR_reserve_hr_2025 = Any[]; FCR_reserve_hr_2030 = Any[]; FCR_reserve_hr_2035 = Any[]; FCR_reserve_hr_2040 = Any[]; FCR_reserve_hr_2045 = Any[]; FCR_reserve_hr_2050 = Any[]
+# FFR_reserve_hr_2025 = Any[]; FFR_reserve_hr_2030 = Any[]; FFR_reserve_hr_2035 = Any[]; FFR_reserve_hr_2040 = Any[]; FFR_reserve_hr_2045 = Any[]; FFR_reserve_hr_2050 = Any[]
+# Inertia_2025 = Any[]; Inertia_2030 = Any[]; Inertia_2035 = Any[]; Inertia_2040 = Any[]; Inertia_2045 = Any[]; Inertia_2050 = Any[]
 
 
 
-for b in year_base[1]
-     push!(Inertia_2025, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
-     push!(FFR_reserve_hr_2025, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
-     push!(FCR_reserve_hr_2025, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
-end
-
-for b in year_base[2]
-     push!(Inertia_2030, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
-     push!(FFR_reserve_hr_2030, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
-     push!(FCR_reserve_hr_2030, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
-end
-
-for b in year_base[3]
-     push!(Inertia_2035, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
-     push!(FFR_reserve_hr_2035, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
-     push!(FCR_reserve_hr_2035, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
-end
+# for b in year_base[1]
+#      push!(Inertia_2025, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
+#      push!(FFR_reserve_hr_2025, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
+#      push!(FCR_reserve_hr_2025, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
+# end
+#
+# for b in year_base[2]
+#      push!(Inertia_2030, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
+#      push!(FFR_reserve_hr_2030, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
+#      push!(FCR_reserve_hr_2030, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
+# end
+#
+# for b in year_base[3]
+#      push!(Inertia_2035, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
+#      push!(FFR_reserve_hr_2035, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])
+#      push!(FCR_reserve_hr_2035, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pgg"])
+# end
 # for b in year_base[4]
 #      push!(Inertia_2040, data_cont["nw"]["$b"]["reserves"]["2"]["H"])
 #      push!(FFR_reserve_hr_2040, resultDC1["solution"]["nw"]["$(b+1)"]["reserves"]["2"]["Pff"])

@@ -12,17 +12,17 @@ using JLD2
 using Statistics, FileIO
 
 include("basencont_nw.jl")
-Total_sample = 10# samples per yearsum()
+Total_sample = 25# samples per yearsum()
 total_yr = 3# the years in horizon, data coming from excels
 period = "multi" # single or multi
 # Prot_system = "NS_CB"
 # Prot_system_coll = ["NS_CB"]
-Prot_system_coll = ["FS_HDCCB", "NS_CB"]
+Prot_system_coll = ["FS_HDCCB", "NS_CB"]# different file for permanent loss
 curtailed_gen = [1,2] #geneartor numbers # change also constraint max(), generating power,file name
 syncarea = 2
 max_curt = 1
 cost = Any[]
-for proti = 1:3
+for proti = 1:2
     Prot_system = Prot_system_coll[proti]
     file = "./test/data/4bus_TNEP.m"
     data_sp = _PM.parse_file(file)
@@ -76,7 +76,7 @@ for proti = 1:3
 
     for (n,nw) in data_cont["nw"]
                 for (r,reserves) in nw["reserves"]
-                     if Prot_system == "FS_HDCCB"; reserves["Tcl"] = 0.148
+                     if Prot_system == "FS_HDCCB"; reserves["Tcl"] = 0.150
                      elseif Prot_system == "FS_MDCCB"; reserves["Tcl"] = 0.293
                      elseif Prot_system == "NS_FB"; reserves["Tcl"] = 0.100
                      elseif Prot_system == "NS_CB"; reserves["Tcl"] = 0.150
@@ -93,10 +93,10 @@ for proti = 1:3
      XLSX.openxlsx(filepath, mode="w") do xf
         sheet = xf[1]
         sheet["$(string("A",1))"] = data_cont["nw"]["1"]["reserves"]["2"]["H"]
-        sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_Reserves"]
-        sheet["$(string("A",3))"] = resultDC1["solution"]["nw"]["1"]["FCR_Reserves"]
-        sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost"]
-        sheet["$(string("A",5))"] = mean(resultDC1["solution"]["nw"]["1"]["Curt"])
+        sheet["$(string("A",2))"] = resultDC1["solution"]["nw"]["1"]["FFR_p1"] + resultDC1["solution"]["nw"]["1"]["FFR_p2"] + resultDC1["solution"]["nw"]["1"]["FFR_p3"]
+        sheet["$(string("A",3))"] =  resultDC1["solution"]["nw"]["1"]["FCR_p1"] + resultDC1["solution"]["nw"]["1"]["FCR_p2"] + resultDC1["solution"]["nw"]["1"]["FCR_p3"]
+        sheet["$(string("A",4))"] = resultDC1["solution"]["nw"]["1"]["Gen_cost_p1"] + resultDC1["solution"]["nw"]["1"]["Gen_cost_p2"] + resultDC1["solution"]["nw"]["1"]["Gen_cost_p3"]
+        sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Curt"])
         # sheet["$(string("A",5))"] = sum(resultDC1["solution"]["nw"]["1"]["Cont"])
         sheet["$(string("A",6))"] = resultDC1["objective"]
         sheet["$(string("A",7))"] = resultDC1["solution"]["nw"]["1"]["Cont"]
